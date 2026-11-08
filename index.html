@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de Taxas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}
+/* Layout: single column tool — inputs card on top, installment table below; tabs switch simulators */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --fg:#14202b; --muted:#5b6b78; --line:#dbe2e8;
+  --accent:#0b6e8a; --accent-ink:#ffffff; --accent-soft:#e2f1f5; --warn:#9a5b00; --warn-soft:#fff3df;
+  --font-ui:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-num:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f161c; --surface:#17212a; --fg:#e6edf2; --muted:#93a4b1; --line:#2a3743;
+  --accent:#4fb7d4; --accent-ink:#06222b; --accent-soft:#163541; --warn:#f2b45a; --warn-soft:#352812; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f161c; --surface:#17212a; --fg:#e6edf2; --muted:#93a4b1; --line:#2a3743;
+  --accent:#4fb7d4; --accent-ink:#06222b; --accent-soft:#163541; --warn:#f2b45a; --warn-soft:#352812; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-ui);font-size:15px;line-height:1.45}
+.wrap{max-width:860px;margin:0 auto;padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+header h1{font-size:26px;margin:0;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:4px 0 0;color:var(--muted)}
+nav{display:flex;flex-wrap:wrap;gap:6px}
+nav button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 14px;border-radius:999px;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.field{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden}
+.field span{padding:0 10px;color:var(--muted);font-family:var(--font-num);font-size:13px}
+.field input{flex:1;min-width:0;border:0;background:transparent;color:var(--fg);font:600 16px var(--font-num);padding:10px 10px 10px 0;text-align:right}
+.field span+input{padding-left:0}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px;padding-top:16px;border-top:1px dashed var(--line)}
+.summary div{display:grid;gap:2px}
+.summary small{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.summary b{font:600 18px var(--font-num);font-variant-numeric:tabular-nums}
+.summary .hl b{color:var(--accent)}
+.tablebox{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{text-align:right;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;font-family:var(--font-num);font-size:14px;white-space:nowrap}
+td.big{font-weight:600;font-size:15px}
+td.rate{color:var(--muted)}
+tr.debit td{background:var(--accent-soft)}
+tbody tr:hover td{background:var(--accent-soft)}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.bar h2{font-size:16px;margin:0}
+.btn{font:inherit;font-weight:600;border:1px solid var(--accent);background:transparent;color:var(--accent);padding:7px 12px;border-radius:8px;cursor:pointer}
+.btn.solid{background:var(--accent);color:var(--accent-ink)}
+.note{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:13px}
+.ratesgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.ratesgrid label{text-transform:none;letter-spacing:0;font-size:13px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-weight:600}
+textarea{width:100%;box-sizing:border-box;min-height:140px;font:13px var(--font-num);background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:10px}
+@media (prefers-reduced-motion:no-preference){nav button,.btn{transition:background .15s,color .15s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Simulador de Taxas</h1>
+    <p>Calcule parcelas no cartão (1x a 18x), débito e boleto já com Simples Nacional e taxa da maquininha.</p>
+  </header>
+
+  <nav role="tablist" aria-label="Simuladores">
+    <button role="tab" data-tab="iphone" aria-selected="true">Aparelho novo / seminovo</button>
+    <button role="tab" data-tab="servico" aria-selected="false">Serviço</button>
+    <button role="tab" data-tab="boleto" aria-selected="false">Boleto</button>
+    <button role="tab" data-tab="taxas" aria-selected="false">Taxas da maquininha</button>
+  </nav>
+
+  <!-- APARELHO -->
+  <section id="tab-iphone" class="grid" style="grid-template-columns:1fr">
+    <div class="card">
+      <div class="grid">
+        <label>Valor de custo<div class="field"><span>R$</span><input id="ip-custo" inputmode="decimal" value="3.000,00"></div></label>
+        <label>Lucro desejado<div class="field"><span>R$</span><input id="ip-lucro" inputmode="decimal" value="0,00"></div></label>
+        <label>Entrada<div class="field"><span>R$</span><input id="ip-entrada" inputmode="decimal" value="0,00"></div></label>
+        <label>Simples Nacional<div class="field"><input id="ip-simples" inputmode="decimal" value="3,11"><span>%</span></div></label>
+      </div>
+      <div class="summary">
+        <div><small>Simples Nacional</small><b id="ip-out-simples">–</b></div>
+        <div><small>Total c/ Simples</small><b id="ip-out-total">–</b></div>
+        <div class="hl"><small>Valor a parcelar</small><b id="ip-out-parcelar">–</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="bar"><h2>Parcelamento</h2><button class="btn solid" data-copy="iphone">Copiar para WhatsApp</button></div>
+      <div class="tablebox"><table><thead><tr><th>Parcelas</th><th>Valor da parcela</th><th>Valor total</th><th>Taxa</th></tr></thead><tbody id="ip-table"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- SERVIÇO -->
+  <section id="tab-servico" class="grid" style="grid-template-columns:1fr" hidden>
+    <div class="card">
+      <div class="grid">
+        <label>Valor do serviço<div class="field"><span>R$</span><input id="sv-valor" inputmode="decimal" value="780,00"></div></label>
+        <label>Lucro<div class="field"><span>R$</span><input id="sv-lucro" inputmode="decimal" value="30,00"></div></label>
+        <label>Entrada<div class="field"><span>R$</span><input id="sv-entrada" inputmode="decimal" value="0,00"></div></label>
+        <label>Simples Nacional<div class="field"><input id="sv-simples" inputmode="decimal" value="6,00"><span>%</span></div></label>
+      </div>
+      <div class="summary">
+        <div><small>Simples Nacional</small><b id="sv-out-simples">–</b></div>
+        <div><small>Valor total</small><b id="sv-out-total">–</b></div>
+        <div class="hl"><small>Valor a parcelar</small><b id="sv-out-parcelar">–</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="bar"><h2>Parcelamento</h2><button class="btn solid" data-copy="servico">Copiar para WhatsApp</button></div>
+      <div class="tablebox"><table><thead><tr><th>Parcelas</th><th>Valor da parcela</th><th>Valor total</th><th>Taxa</th></tr></thead><tbody id="sv-table"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- BOLETO -->
+  <section id="tab-boleto" class="grid" style="grid-template-columns:1fr" hidden>
+    <div class="card">
+      <div class="grid">
+        <label>Valor da venda<div class="field"><span>R$</span><input id="bo-venda" inputmode="decimal" value="4.300,00"></div></label>
+        <label>Simples Nacional<div class="field"><input id="bo-simples" inputmode="decimal" value="3,11"><span>%</span></div></label>
+        <label>Taxa do boleto<div class="field"><input id="bo-taxa" inputmode="decimal" value="5,00"><span>%</span></div></label>
+      </div>
+      <div class="summary">
+        <div><small>Simples Nacional</small><b id="bo-out-simples">–</b></div>
+        <div><small>Taxa do boleto</small><b id="bo-out-taxa">–</b></div>
+        <div class="hl"><small>Total no boleto</small><b id="bo-out-total">–</b></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAXAS -->
+  <section id="tab-taxas" class="grid" style="grid-template-columns:1fr" hidden>
+    <div class="card">
+      <div class="bar"><h2>Taxas para aparelhos (%)</h2><button class="btn" data-reset="iphone">Restaurar padrão</button></div>
+      <div class="ratesgrid" id="rates-iphone"></div>
+    </div>
+    <div class="card">
+      <div class="bar"><h2>Taxas para serviços (%)</h2><button class="btn" data-reset="servico">Restaurar padrão</button></div>
+      <div class="ratesgrid" id="rates-servico"></div>
+    </div>
+    <div class="card">
+      <div class="bar"><h2>Simples sobre o acréscimo da taxa (%)</h2></div>
+      <div class="grid">
+        <label>Aparelhos<div class="field"><input id="ex-iphone" inputmode="decimal" value="3,11"><span>%</span></div></label>
+        <label>Serviços<div class="field"><input id="ex-servico" inputmode="decimal" value="2,64"><span>%</span></div></label>
+      </div>
+      <p class="note" style="margin:14px 0 0">As taxas ficam salvas só neste navegador. Para mudar as taxas para todo mundo, peça para atualizar a página publicada.</p>
+    </div>
+  </section>
+
+  <div id="copybox" class="card" hidden>
+    <div class="bar"><h2>Texto da simulação</h2><button class="btn" id="copyclose">Fechar</button></div>
+    <textarea id="copytext" readonly></textarea>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const DEFAULTS = {
+  iphone: {debito:0.99, parc:[3.05,4.45,5.3,6.15,7,7.85,8.29,9.14,9.99,10.84,11.69,12.54,13.29,14.09,14.89,15.69,16.49,17.29]},
+  servico:{debito:0.99, parc:[2.99,3.23,3.93,4.62,5.31,6.05,6.64,7.82,8.41,10,10.5,12,12,13.5,14,14.5,15,15.5]}
+};
+let rates = JSON.parse(JSON.stringify(DEFAULTS));
+try{ const s = localStorage.getItem('sim-taxas-rates'); if(s) rates = JSON.parse(s); }catch(e){}
+function saveRates(){ try{ localStorage.setItem('sim-taxas-rates', JSON.stringify(rates)); }catch(e){} }
+
+const $ = id => document.getElementById(id);
+const brl = v => isFinite(v) ? v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '–';
+const pct = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '%';
+function num(id){
+  let s = String($(id).value).trim().replace(/[^\d,.\-]/g,'');
+  if(s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
+  const n = parseFloat(s); return isNaN(n) ? 0 : n;
+}
+
+/* Mesma fórmula da planilha:
+   bruto = valor / (100 - taxa) * 100
+   total = bruto + (bruto - valor) * simplesSobreAcrescimo  */
+function cartao(valor, taxa, extra){
+  const bruto = valor / (100 - taxa) * 100;
+  return bruto + (bruto - valor) * extra / 100;
+}
+function linhas(valor, r, extra){
+  const out = r.parc.map((t,i)=>{ const total = cartao(valor,t,extra); return {n:i+1, total, parcela: total/(i+1), taxa:t}; });
+  const debito = valor / (100 - r.debito) * 100;
+  return {out, debito};
+}
+function renderTable(tbody, data, r){
+  let h = `<tr class="debit"><td>Débito</td><td class="big">${brl(data.debito)}</td><td>${brl(data.debito)}</td><td class="rate">${pct(r.debito)}</td></tr>`;
+  for(const l of data.out) h += `<tr><td>${l.n}x</td><td class="big">${brl(l.parcela)}</td><td>${brl(l.total)}</td><td class="rate">${pct(l.taxa)}</td></tr>`;
+  tbody.innerHTML = h;
+}
+const state = {};
+function calcIphone(){
+  const custo=num('ip-custo'), lucro=num('ip-lucro'), entrada=num('ip-entrada'), simples=num('ip-simples');
+  const total = (custo + lucro) / (1 - simples/100);
+  const parcelar = Math.max(0, total - entrada);
+  $('ip-out-simples').textContent = brl(total - custo - lucro);
+  $('ip-out-total').textContent = brl(total);
+  $('ip-out-parcelar').textContent = brl(parcelar);
+  const d = linhas(parcelar, rates.iphone, num('ex-iphone'));
+  renderTable($('ip-table'), d, rates.iphone);
+  state.iphone = {titulo:'Aparelho', entrada, d};
+}
+function calcServico(){
+  const valor=num('sv-valor'), lucro=num('sv-lucro'), entrada=num('sv-entrada'), simples=num('sv-simples');
+  const total = (valor + lucro) / (1 - simples/100);
+  const parcelar = Math.max(0, total - entrada);
+  $('sv-out-simples').textContent = brl(total - valor - lucro);
+  $('sv-out-total').textContent = brl(total);
+  $('sv-out-parcelar').textContent = brl(parcelar);
+  const d = linhas(parcelar, rates.servico, num('ex-servico'));
+  renderTable($('sv-table'), d, rates.servico);
+  state.servico = {titulo:'Serviço', entrada, d};
+}
+function calcBoleto(){
+  const venda=num('bo-venda'), s=venda*num('bo-simples')/100, t=venda*num('bo-taxa')/100;
+  $('bo-out-simples').textContent = brl(s); $('bo-out-taxa').textContent = brl(t); $('bo-out-total').textContent = brl(venda+s+t);
+}
+function buildRates(key){
+  const box = $('rates-'+key); const r = rates[key];
+  let h = `<label>Débito<div class="field"><input data-k="${key}" data-i="d" inputmode="decimal" value="${String(r.debito).replace('.',',')}"><span>%</span></div></label>`;
+  r.parc.forEach((t,i)=> h += `<label>${i+1}x<div class="field"><input data-k="${key}" data-i="${i}" inputmode="decimal" value="${String(t).replace('.',',')}"><span>%</span></div></label>`);
+  box.innerHTML = h;
+  box.querySelectorAll('input').forEach((inp,j)=>{ inp.id = `rate-${key}-${inp.dataset.i}`; });
+}
+function all(){ calcIphone(); calcServico(); calcBoleto(); }
+
+document.addEventListener('input', e=>{
+  const el = e.target;
+  if(el.dataset && el.dataset.k){
+    const n = parseFloat(el.value.replace(/\./g,'').replace(',','.'));
+    if(!isNaN(n) && n < 100){ if(el.dataset.i==='d') rates[el.dataset.k].debito = n; else rates[el.dataset.k].parc[+el.dataset.i] = n; saveRates(); }
+  }
+  all();
+});
+document.querySelectorAll('[data-reset]').forEach(b=>b.addEventListener('click',()=>{
+  const k=b.dataset.reset; rates[k]=JSON.parse(JSON.stringify(DEFAULTS[k])); saveRates(); buildRates(k); all(); toast('Taxas restauradas');
+}));
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected', x===b));
+  ['iphone','servico','boleto','taxas'].forEach(t=> $('tab-'+t).hidden = t!==b.dataset.tab);
+  $('copybox').hidden = true;
+}));
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,1800); }
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>{
+  const s = state[b.dataset.copy]; let txt = `*Simulação de pagamento – ${s.titulo}*\n`;
+  if(s.entrada>0) txt += `Entrada: ${brl(s.entrada)}\n`;
+  txt += `Débito: ${brl(s.d.debito)}\n`;
+  s.d.out.forEach(l=> txt += `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})\n`);
+  const show = ()=>{ $('copytext').value = txt; $('copybox').hidden=false; $('copytext').select(); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>toast('Simulação copiada'), ()=>{ show(); toast('Selecione e copie o texto abaixo'); });
+  } else show();
+}));
+$('copyclose').addEventListener('click',()=>$('copybox').hidden=true);
+buildRates('iphone'); buildRates('servico'); all();
+</script>
+</body>
+</html>
