@@ -8,7 +8,8 @@ Simulador de parcelamento no cartão (débito e 1x a 18x). O cliente informa o v
 
 Edite o arquivo `index.html` e procure por `CONFIG` no início do script:
 
-- `simples`: % do Simples Nacional
+- `novo` e `seminovo`: cada tipo de aparelho tem sua configuração
+- `simples`: % do Simples Nacional (zero no Novo)
 - `simplesAcrescimo`: % do Simples sobre o acréscimo da taxa
 - `debito`: taxa do débito
 - `parcelas`: taxas de 1x a 18x

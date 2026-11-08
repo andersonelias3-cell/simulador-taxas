@@ -46,6 +46,9 @@ tbody tr:hover td{background:var(--accent-soft)}
 .bar h2{font-size:16px;margin:0}
 .btn{font:inherit;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:8px 14px;border-radius:8px;cursor:pointer}
 .btn.ghost{background:transparent;color:var(--accent)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:16px}
+.seg button{font:inherit;font-weight:600;font-size:15px;border:0;background:transparent;color:var(--muted);padding:10px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-weight:600}
 textarea{width:100%;min-height:160px;font:13px var(--font-num);background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:10px}
 </style>
@@ -58,6 +61,10 @@ textarea{width:100%;min-height:160px;font:13px var(--font-num);background:var(--
   </header>
 
   <div class="card">
+    <div class="seg" role="group" aria-label="Tipo de aparelho">
+      <button type="button" id="btn-novo" data-tipo="novo" aria-pressed="true">iPhone Novo</button>
+      <button type="button" id="btn-seminovo" data-tipo="seminovo" aria-pressed="false">iPhone Seminovo</button>
+    </div>
     <div class="grid">
       <label for="valor">Valor a parcelar<div class="field"><span>R$</span><input id="valor" inputmode="decimal" value="3.000,00"></div></label>
       <label for="entrada">Valor de entrada<div class="field"><span>R$</span><input id="entrada" inputmode="decimal" value="0,00"></div></label>
@@ -83,12 +90,25 @@ textarea{width:100%;min-height:160px;font:13px var(--font-num);background:var(--
 <script>
 /* ===== CONFIGURAÇÃO INTERNA (não aparece na tela) ===== */
 const CONFIG = {
-  simples: 3.11,          // % Simples Nacional sobre o valor
-  simplesAcrescimo: 3.11, // % Simples sobre o acréscimo da taxa da maquininha
-  debito: 0.99,           // % taxa do débito
-  // % taxa da maquininha de 1x a 18x
-  parcelas: [3.05,4.45,5.3,6.15,7,7.85,8.29,9.14,9.99,10.84,11.69,12.54,13.29,14.09,14.89,15.69,16.49,17.29]
+  // iPhone NOVO: só a taxa da maquininha, sem Simples
+  novo: {
+    nome: 'iPhone Novo',
+    simples: 0,             // % Simples Nacional sobre o valor
+    simplesAcrescimo: 0,    // % Simples sobre o acréscimo da taxa
+    debito: 0.99,           // % taxa do débito
+    // % taxa de 1x a 18x
+    parcelas: [2.99,5.30,5.30,6.15,7.00,7.85,8.29,9.14,9.99,10.84,11.69,12.54,13.29,14.09,14.89,15.69,16.49,17.29]
+  },
+  // iPhone SEMINOVO: taxas da planilha, com Simples Nacional
+  seminovo: {
+    nome: 'iPhone Seminovo',
+    simples: 3.11,
+    simplesAcrescimo: 3.11,
+    debito: 0.99,
+    parcelas: [3.05,4.45,5.3,6.15,7,7.85,8.29,9.14,9.99,10.84,11.69,12.54,13.29,14.09,14.89,15.69,16.49,17.29]
+  }
 };
+let tipo = 'novo';
 /* ====================================================== */
 
 const $ = id => document.getElementById(id);
@@ -105,12 +125,13 @@ function calcular(){
   const entrada = Math.max(0, num('entrada'));
   // 1) abate a entrada  2) aplica o Simples  3) aplica a taxa da maquininha
   const saldo = Math.max(0, valor - entrada);
-  const base = saldo / (1 - CONFIG.simples/100);
+  const cfg = CONFIG[tipo];
+  const base = saldo / (1 - cfg.simples/100);
 
-  const debito = base / (100 - CONFIG.debito) * 100;
-  const linhas = CONFIG.parcelas.map((taxa, i) => {
+  const debito = base / (100 - cfg.debito) * 100;
+  const linhas = cfg.parcelas.map((taxa, i) => {
     const bruto = base / (100 - taxa) * 100;
-    const total = bruto + (bruto - base) * CONFIG.simplesAcrescimo/100;
+    const total = bruto + (bruto - base) * cfg.simplesAcrescimo/100;
     return {n:i+1, total, parcela: total/(i+1)};
   });
 
@@ -119,12 +140,12 @@ function calcular(){
   let h = `<tr class="debit"><td>Débito</td><td class="big">${brl(debito)}</td><td>${brl(debito)}</td></tr>`;
   for(const l of linhas) h += `<tr><td>${l.n}x</td><td class="big">${brl(l.parcela)}</td><td>${brl(l.total)}</td></tr>`;
   $('tabela').innerHTML = h;
-  ultimo = {entrada, debito, linhas};
+  ultimo = {nome: cfg.nome, entrada, debito, linhas};
 }
 
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,1800); }
 $('copiar').addEventListener('click',()=>{
-  const s = ultimo; let txt = `*Simulação de pagamento*\n`;
+  const s = ultimo; let txt = `*Simulação de pagamento – ${s.nome}*\n`;
   if(s.entrada>0) txt += `Entrada: ${brl(s.entrada)}\n`;
   txt += `Débito: ${brl(s.debito)}\n`;
   s.linhas.forEach(l=> txt += `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})\n`);
@@ -134,6 +155,11 @@ $('copiar').addEventListener('click',()=>{
   } else mostrar();
 });
 $('fechar').addEventListener('click',()=>$('copybox').hidden=true);
+document.querySelectorAll('[data-tipo]').forEach(b => b.addEventListener('click', () => {
+  tipo = b.dataset.tipo;
+  document.querySelectorAll('[data-tipo]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  calcular();
+}));
 document.addEventListener('input', calcular);
 calcular();
 </script>
