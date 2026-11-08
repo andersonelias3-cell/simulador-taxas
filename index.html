@@ -3,87 +3,208 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Simulador de Taxas</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<title>Simulador de Parcelamento</title>
+<meta name="description" content="Simule o parcelamento de iPhone novo ou seminovo no débito e no cartão de 1x a 18x.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
 <style>
-*{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}
-/* Layout: coluna única — campos no topo, tabela de parcelas abaixo */
+/* Conceito: "titânio" — superfícies frias de porcelana/grafite, filetes finos,
+   número-herói em serifa; painel de entrada à esquerda, opções à direita. */
 :root{
-  --bg:#f3f5f7; --surface:#ffffff; --fg:#14202b; --muted:#5b6b78; --line:#dbe2e8;
-  --accent:#0b6e8a; --accent-ink:#ffffff; --accent-soft:#e2f1f5;
-  --font-ui:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --font-num:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --bg:#eef0f2; --bg-2:#e4e7ea; --surface:#fbfbfc; --raised:#ffffff;
+  --fg:#16191d; --fg-2:#3d434a; --muted:#7a828b; --line:#d9dde1; --line-2:#c9ced4;
+  --accent:#2c5a84; --accent-ink:#ffffff; --accent-tint:#e6edf4;
+  --sheen-a:#ffffff; --sheen-b:#dfe3e7;
+  --shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 20px 40px -24px rgba(22,25,29,.25);
+  --display:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --ui:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root{
-  --bg:#0f161c; --surface:#17212a; --fg:#e6edf2; --muted:#93a4b1; --line:#2a3743;
-  --accent:#4fb7d4; --accent-ink:#06222b; --accent-soft:#163541; color-scheme:dark}}
-body{background:var(--bg);color:var(--fg);font-family:var(--font-ui);font-size:15px;line-height:1.45}
-.wrap{max-width:760px;margin:0 auto;padding-block:max(24px,env(safe-area-inset-top,0px)) max(48px,env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
-header h1{font-size:26px;margin:0;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
-header p{margin:4px 0 0;color:var(--muted)}
+  --bg:#0e1013; --bg-2:#14171b; --surface:#171a1f; --raised:#1d2127;
+  --fg:#eceef0; --fg-2:#c3c8ce; --muted:#878f98; --line:#272c33; --line-2:#343a42;
+  --accent:#9cc0e3; --accent-ink:#0d1a26; --accent-tint:#1b2633;
+  --sheen-a:#262b32; --sheen-b:#15181c;
+  --shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 24px 48px -28px rgba(0,0,0,.8);
+  color-scheme:dark}}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--ui);font-size:15px;line-height:1.5;
+  background-image:radial-gradient(1200px 500px at 85% -10%, var(--bg-2), transparent 70%);min-height:100vh}
+.wrap{max-width:1080px;margin:0 auto;
+  padding-block:max(40px,env(safe-area-inset-top,0px)) max(56px,env(safe-area-inset-bottom,0px));
+  padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+
+/* Cabeçalho */
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:36px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(38px,6vw,56px);line-height:1;letter-spacing:-.015em;margin:0;text-wrap:balance}
+h1 em{font-style:italic;color:var(--fg-2)}
+.lede{color:var(--muted);max-width:34ch;margin:0;font-size:14px}
+
+/* Grade principal */
+.layout{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.panel-in{padding:24px}
+.sticky{position:sticky;top:max(20px,env(safe-area-inset-top,0px))}
+@media (max-width:860px){.sticky{position:static}}
+
+.label{display:block;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+
+/* Seletor Novo / Seminovo */
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:26px}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:10px;background:var(--raised);
+  box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--line-2)}
+.seg[data-tipo="seminovo"] .thumb{transform:translateX(100%)}
+.seg button{position:relative;z-index:1;font:inherit;font-weight:600;font-size:14px;border:0;background:transparent;color:var(--muted);
+  padding:12px 8px;border-radius:10px;cursor:pointer;display:grid;gap:1px;justify-items:center}
+.seg button small{font-weight:500;font-size:11px;letter-spacing:.02em;color:var(--muted)}
+.seg button[aria-pressed="true"]{color:var(--fg)}
+
+/* Campos */
+.fields{display:grid;gap:18px}
+.field{display:grid;gap:8px;min-width:0}
+.money{display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line-2);padding:4px 2px 10px}
+.money:focus-within{border-bottom-color:var(--accent)}
+.money span{font-size:15px;color:var(--muted);font-weight:500}
+.money input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--fg);
+  font-family:var(--display);font-size:34px;line-height:1.1;padding:0;width:100%;font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--muted);margin:0}
+
+.saldo{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:22px;padding-top:18px;border-top:1px dashed var(--line-2)}
+.saldo span{font-size:13px;color:var(--muted)}
+.saldo b{font-weight:600;font-size:17px;font-variant-numeric:tabular-nums}
+
+/* Herói: opção escolhida */
+.hero{position:relative;overflow:hidden;border-radius:20px;border:1px solid var(--line-2);
+  background:linear-gradient(135deg,var(--sheen-a) 0%,var(--sheen-b) 55%,var(--sheen-a) 100%);
+  box-shadow:var(--shadow);padding:28px 28px 24px;margin-bottom:24px}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0 2px,rgba(127,127,127,.035) 2px 3px)}
+.hero-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-tint);padding:6px 10px;border-radius:999px}
+.chip i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.hero-num{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:18px 0 6px}
+.hero-num .n{font-family:var(--display);font-size:clamp(40px,6vw,56px);line-height:1;color:var(--fg-2)}
+.hero-num .v{font-family:var(--display);font-size:clamp(52px,9vw,84px);line-height:.95;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hero-sub{color:var(--muted);font-size:14px;margin:0}
+.hero-sub b{color:var(--fg);font-weight:600}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;position:relative;z-index:1}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:12px;padding:11px 18px;cursor:pointer;border:1px solid var(--fg);background:var(--fg);color:var(--bg);
+  display:inline-flex;align-items:center;gap:8px}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line-2)}
+.btn svg{width:16px;height:16px}
+
+/* Lista de opções */
+.list-head{display:flex;justify-content:space-between;align-items:baseline;padding:20px 24px 12px}
+.list-head h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0}
+.list-head span{font-size:12px;color:var(--muted)}
+@media (max-width:560px){.list-head span{display:none}}
+.opts{list-style:none;margin:0;padding:0 12px 12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px}
+@media (max-width:560px){.opts{grid-template-columns:minmax(0,1fr)}}
+.opt{width:100%;font:inherit;color:inherit;text-align:left;border:1px solid transparent;background:transparent;border-radius:12px;cursor:pointer;
+  display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px 12px}
+.opt:hover{background:var(--bg)}
+.opt .q{font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.opt .p{font-weight:600;font-size:16px;font-variant-numeric:tabular-nums}
+.opt .t{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.opt[aria-pressed="true"]{background:var(--accent-tint);border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.opt[aria-pressed="true"] .q{color:var(--accent)}
+.opt.debito{grid-column:1/-1;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;margin-bottom:6px;padding-bottom:14px}
+.opt.debito[aria-pressed="true"]{border-radius:12px;border-bottom-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+
+.foot{margin-top:28px;font-size:12px;color:var(--muted);text-align:center}
+
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
-label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.field{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden}
-.field span{padding:0 10px;color:var(--muted);font-family:var(--font-num);font-size:14px}
-.field input{flex:1;min-width:0;border:0;background:transparent;color:var(--fg);font:600 18px var(--font-num);padding:12px 12px 12px 0;text-align:right}
-.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px;padding-top:16px;border-top:1px dashed var(--line)}
-.summary div{display:grid;gap:2px}
-.summary small{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
-.summary b{font:600 18px var(--font-num);font-variant-numeric:tabular-nums}
-.summary .hl b{color:var(--accent)}
-.tablebox{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-th{text-align:right;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
-th:first-child,td:first-child{text-align:left}
-td{padding:10px;border-bottom:1px solid var(--line);text-align:right;font-family:var(--font-num);font-size:14px;white-space:nowrap}
-td.big{font-weight:600;font-size:15px}
-tr.debit td{background:var(--accent-soft)}
-tbody tr:hover td{background:var(--accent-soft)}
-.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px}
-.bar h2{font-size:16px;margin:0}
-.btn{font:inherit;font-weight:600;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:8px 14px;border-radius:8px;cursor:pointer}
-.btn.ghost{background:transparent;color:var(--accent)}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:16px}
-.seg button{font:inherit;font-weight:600;font-size:15px;border:0;background:transparent;color:var(--muted);padding:10px;border-radius:7px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-weight:600}
-textarea{width:100%;min-height:160px;font:13px var(--font-num);background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:10px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);
+  padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 10px 30px -10px rgba(0,0,0,.4)}
+textarea{width:100%;min-height:180px;font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}
+
+@media (prefers-reduced-motion:no-preference){
+  .seg .thumb{transition:transform .28s cubic-bezier(.2,.7,.2,1)}
+  .opt,.btn,.seg button{transition:background .15s,border-color .15s,color .15s}
+  .hero-num .v{transition:opacity .2s}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>Simulador de Taxas</h1>
-    <p>Informe o valor e a entrada para ver as opções no débito e no cartão de 1x a 18x.</p>
+  <header class="top">
+    <div>
+      <p class="eyebrow">Simulador de parcelamento</p>
+      <h1>Seu iPhone, <em>do seu jeito.</em></h1>
+    </div>
+    <p class="lede">Escolha o aparelho, informe o valor e a entrada. As opções no débito e no cartão aparecem na hora.</p>
   </header>
 
-  <div class="card">
-    <div class="seg" role="group" aria-label="Tipo de aparelho">
-      <button type="button" id="btn-novo" data-tipo="novo" aria-pressed="true">iPhone Novo</button>
-      <button type="button" id="btn-seminovo" data-tipo="seminovo" aria-pressed="false">iPhone Seminovo</button>
-    </div>
-    <div class="grid">
-      <label for="valor">Valor a parcelar<div class="field"><span>R$</span><input id="valor" inputmode="decimal" value="3.000,00"></div></label>
-      <label for="entrada">Valor de entrada<div class="field"><span>R$</span><input id="entrada" inputmode="decimal" value="0,00"></div></label>
-    </div>
-    <div class="summary">
-      <div><small>Entrada</small><b id="out-entrada">–</b></div>
-      <div class="hl"><small>Saldo a parcelar</small><b id="out-saldo">–</b></div>
-    </div>
-  </div>
+  <main class="layout">
+    <!-- Entrada de dados -->
+    <section class="panel sticky" aria-label="Dados da simulação">
+      <div class="panel-in">
+        <span class="label">Aparelho</span>
+        <div class="seg" id="seg" data-tipo="novo" role="group" aria-label="Tipo de aparelho">
+          <span class="thumb" aria-hidden="true"></span>
+          <button type="button" id="btn-novo" data-tipo="novo" aria-pressed="true">iPhone Novo<small>Lacrado</small></button>
+          <button type="button" id="btn-seminovo" data-tipo="seminovo" aria-pressed="false">iPhone Seminovo<small>Revisado</small></button>
+        </div>
 
-  <div class="card">
-    <div class="bar"><h2>Opções de pagamento</h2><button class="btn" id="copiar">Copiar para WhatsApp</button></div>
-    <div class="tablebox"><table><thead><tr><th>Parcelas</th><th>Valor da parcela</th><th>Valor total</th></tr></thead><tbody id="tabela"></tbody></table></div>
-  </div>
+        <div class="fields">
+          <div class="field">
+            <label class="label" for="valor" style="margin:0">Valor a parcelar</label>
+            <div class="money"><span>R$</span><input id="valor" inputmode="decimal" autocomplete="off" value="3.000,00"></div>
+          </div>
+          <div class="field">
+            <label class="label" for="entrada" style="margin:0">Valor de entrada</label>
+            <div class="money"><span>R$</span><input id="entrada" inputmode="decimal" autocomplete="off" value="0,00"></div>
+            <p class="hint">A entrada é descontada antes de calcular as parcelas.</p>
+          </div>
+        </div>
 
-  <div id="copybox" class="card" hidden>
-    <div class="bar"><h2>Texto da simulação</h2><button class="btn ghost" id="fechar">Fechar</button></div>
-    <textarea id="copytext" readonly></textarea>
-  </div>
+        <div class="saldo"><span>Saldo a parcelar</span><b id="out-saldo">–</b></div>
+      </div>
+    </section>
+
+    <!-- Resultado -->
+    <section aria-label="Resultado">
+      <div class="hero" aria-live="polite">
+        <div class="hero-top">
+          <span class="chip"><i></i><span id="hero-tipo">iPhone Novo</span></span>
+        </div>
+        <div class="hero-num"><span class="n" id="hero-n">12x</span><span class="v" id="hero-v">–</span></div>
+        <p class="hero-sub" id="hero-sub">–</p>
+        <div class="actions">
+          <button class="btn" id="copiar" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+            Copiar simulação completa
+          </button>
+          <button class="btn ghost" id="copiar-um" type="button">Copiar só esta opção</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="list-head"><h2>Opções de pagamento</h2><span>Toque para destacar</span></div>
+        <ul class="opts" id="opts"></ul>
+      </div>
+
+      <div id="copybox" class="panel" hidden style="margin-top:24px">
+        <div class="panel-in">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <strong>Texto da simulação</strong>
+            <button class="btn ghost" id="fechar" type="button">Fechar</button>
+          </div>
+          <textarea id="copytext" readonly></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <p class="foot">Valores sujeitos à aprovação da operadora do cartão.</p>
 </div>
 <div class="toast" id="toast" hidden></div>
 
@@ -108,59 +229,104 @@ const CONFIG = {
     parcelas: [3.05,4.45,5.3,6.15,7,7.85,8.29,9.14,9.99,10.84,11.69,12.54,13.29,14.09,14.89,15.69,16.49,17.29]
   }
 };
-let tipo = 'novo';
 /* ====================================================== */
+
+let tipo = 'novo';
+let escolha = 12;            // 0 = débito, 1..18 = parcelas
+let ultimo = null;
 
 const $ = id => document.getElementById(id);
 const brl = v => isFinite(v) ? v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '–';
+const fmt = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 function num(id){
   let s = String($(id).value).trim().replace(/[^\d,.\-]/g,'');
   if(s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
+  else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g,'');
   const n = parseFloat(s); return isNaN(n) ? 0 : n;
 }
 
-let ultimo = null;
 function calcular(){
+  const cfg = CONFIG[tipo];
   const valor = num('valor');
   const entrada = Math.max(0, num('entrada'));
   // 1) abate a entrada  2) aplica o Simples  3) aplica a taxa da maquininha
   const saldo = Math.max(0, valor - entrada);
-  const cfg = CONFIG[tipo];
   const base = saldo / (1 - cfg.simples/100);
-
   const debito = base / (100 - cfg.debito) * 100;
   const linhas = cfg.parcelas.map((taxa, i) => {
     const bruto = base / (100 - taxa) * 100;
     const total = bruto + (bruto - base) * cfg.simplesAcrescimo/100;
     return {n:i+1, total, parcela: total/(i+1)};
   });
-
-  $('out-entrada').textContent = brl(entrada);
+  ultimo = {nome: cfg.nome, entrada, saldo, debito, linhas};
   $('out-saldo').textContent = brl(saldo);
-  let h = `<tr class="debit"><td>Débito</td><td class="big">${brl(debito)}</td><td>${brl(debito)}</td></tr>`;
-  for(const l of linhas) h += `<tr><td>${l.n}x</td><td class="big">${brl(l.parcela)}</td><td>${brl(l.total)}</td></tr>`;
-  $('tabela').innerHTML = h;
-  ultimo = {nome: cfg.nome, entrada, debito, linhas};
+  desenhar();
 }
 
+function desenhar(){
+  const s = ultimo;
+  let h = `<li style="grid-column:1/-1"><button type="button" class="opt debito" data-n="0" aria-pressed="${escolha===0}">
+      <span class="q">Débito</span><span></span><span class="p">${brl(s.debito)}</span></button></li>`;
+  for(const l of s.linhas){
+    h += `<li><button type="button" class="opt" data-n="${l.n}" aria-pressed="${escolha===l.n}">
+      <span class="q">${l.n}x</span><span class="p">${brl(l.parcela)}</span><span class="t">${brl(l.total)}</span></button></li>`;
+  }
+  $('opts').innerHTML = h;
+
+  $('hero-tipo').textContent = s.nome;
+  if(escolha === 0){
+    $('hero-n').textContent = 'Débito';
+    $('hero-v').textContent = brl(s.debito);
+    $('hero-sub').innerHTML = 'Pagamento à vista no cartão de débito.' + (s.entrada>0 ? ` Entrada de <b>${brl(s.entrada)}</b>.` : '');
+  } else {
+    const l = s.linhas[escolha-1];
+    $('hero-n').textContent = `${l.n}x`;
+    $('hero-v').textContent = brl(l.parcela);
+    $('hero-sub').innerHTML = `Total no cartão <b>${brl(l.total)}</b>` + (s.entrada>0 ? ` + entrada de <b>${brl(s.entrada)}</b>` : '') + '.';
+  }
+}
+
+function textoCompleto(){
+  const s = ultimo; let t = `*Simulação de pagamento – ${s.nome}*\n`;
+  if(s.entrada>0) t += `Entrada: ${brl(s.entrada)}\n`;
+  t += `\nDébito: ${brl(s.debito)}\n`;
+  s.linhas.forEach(l => t += `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})\n`);
+  return t;
+}
+function textoUm(){
+  const s = ultimo; let t = `*${s.nome}*\n`;
+  if(s.entrada>0) t += `Entrada: ${brl(s.entrada)}\n`;
+  if(escolha===0) t += `Débito: ${brl(s.debito)}`;
+  else { const l = s.linhas[escolha-1]; t += `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})`; }
+  return t;
+}
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,1800); }
-$('copiar').addEventListener('click',()=>{
-  const s = ultimo; let txt = `*Simulação de pagamento – ${s.nome}*\n`;
-  if(s.entrada>0) txt += `Entrada: ${brl(s.entrada)}\n`;
-  txt += `Débito: ${brl(s.debito)}\n`;
-  s.linhas.forEach(l=> txt += `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})\n`);
-  const mostrar = ()=>{ $('copytext').value = txt; $('copybox').hidden=false; $('copytext').select(); };
+function copiar(txt){
+  const mostrar = () => { $('copytext').value = txt; $('copybox').hidden = false; $('copytext').select(); };
   if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt).then(()=>toast('Simulação copiada'), ()=>{ mostrar(); toast('Selecione e copie o texto abaixo'); });
+    navigator.clipboard.writeText(txt).then(() => toast('Copiado! Cole no WhatsApp'), () => { mostrar(); toast('Selecione e copie o texto abaixo'); });
   } else mostrar();
+}
+
+$('copiar').addEventListener('click', () => copiar(textoCompleto()));
+$('copiar-um').addEventListener('click', () => copiar(textoUm()));
+$('fechar').addEventListener('click', () => $('copybox').hidden = true);
+$('opts').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if(!b) return;
+  escolha = +b.dataset.n; desenhar();
 });
-$('fechar').addEventListener('click',()=>$('copybox').hidden=true);
-document.querySelectorAll('[data-tipo]').forEach(b => b.addEventListener('click', () => {
+document.querySelectorAll('button[data-tipo]').forEach(b => b.addEventListener('click', () => {
   tipo = b.dataset.tipo;
-  document.querySelectorAll('[data-tipo]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  $('seg').dataset.tipo = tipo;
+  document.querySelectorAll('button[data-tipo]').forEach(x => x.setAttribute('aria-pressed', x === b));
   calcular();
 }));
-document.addEventListener('input', calcular);
+['valor','entrada'].forEach(id => {
+  const el = $(id);
+  el.addEventListener('input', calcular);
+  el.addEventListener('focus', () => setTimeout(() => el.select(), 0));
+  el.addEventListener('blur', () => { el.value = fmt(num(id)); calcular(); });
+});
 calcular();
 </script>
 </body>
