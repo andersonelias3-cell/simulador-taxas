@@ -36,9 +36,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red-2);outline-
 svg{flex:none}
 
 /* ===== Cabeçalho ===== */
-.top{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:0 8px 30px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:0 8px 24px}
 .brand{display:flex;align-items:center;gap:28px;min-width:0}
-.brand img{height:84px;width:auto;display:block}
+.brand img{height:124px;width:auto;display:block}
 .brand .sep{width:2px;align-self:stretch;background:var(--line-2);border-radius:2px}
 .brand h1{margin:0;font-weight:500;font-size:clamp(24px,3.2vw,40px);line-height:1.1;letter-spacing:-.01em}
 .brand h1 b{color:var(--red-2);font-style:italic;font-weight:800}
@@ -46,7 +46,7 @@ svg{flex:none}
 .flags{display:flex;align-items:center;gap:18px}
 .flags .sep{width:1px;height:44px;background:var(--line-2)}
 @media (max-width:720px){
-  .brand{gap:16px}.brand img{height:58px}
+  .brand{gap:16px}.brand img{height:88px}
   .top .flags{display:none}
 }
 @media (max-width:460px){.brand{flex-direction:column;align-items:flex-start;gap:10px}.brand .sep{display:none}}
@@ -180,7 +180,7 @@ textarea{width:100%;min-height:200px;font:13px/1.5 ui-monospace,Menlo,monospace;
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <img src="img/logo.png" alt="Ingacel Maringá" width="220" height="100">
+      <img src="img/logo.png?v=2" alt="Ingacel" width="850" height="627">
       <span class="sep" aria-hidden="true"></span>
       <div>
         <h1>Simulador de <b>Parcelamento</b></h1>
