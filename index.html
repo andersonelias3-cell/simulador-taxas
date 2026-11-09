@@ -3,208 +3,290 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Simulador de Parcelamento</title>
-<meta name="description" content="Simule o parcelamento de iPhone novo ou seminovo no débito e no cartão de 1x a 18x.">
+<title>Simulador de Parcelamento | Ingacel Maringá</title>
+<meta name="description" content="Simule o parcelamento do seu iPhone novo ou seminovo no débito e no cartão de crédito de 1x a 18x.">
+<meta name="theme-color" content="#0b0b0e">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&display=swap">
 <style>
-/* Conceito: "titânio" — superfícies frias de porcelana/grafite, filetes finos,
-   número-herói em serifa; painel de entrada à esquerda, opções à direita. */
+/* Visual Ingacel: fundo grafite com brilho vermelho, cartões de vidro escuro,
+   destaques em vermelho. Tema único escuro, por escolha. */
 :root{
-  --bg:#eef0f2; --bg-2:#e4e7ea; --surface:#fbfbfc; --raised:#ffffff;
-  --fg:#16191d; --fg-2:#3d434a; --muted:#7a828b; --line:#d9dde1; --line-2:#c9ced4;
-  --accent:#2c5a84; --accent-ink:#ffffff; --accent-tint:#e6edf4;
-  --sheen-a:#ffffff; --sheen-b:#dfe3e7;
-  --shadow:0 1px 0 rgba(255,255,255,.8) inset, 0 20px 40px -24px rgba(22,25,29,.25);
-  --display:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
-  --ui:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  color-scheme:light;
+  --bg:#0b0b0e; --panel:rgba(26,26,31,.82); --panel-2:#16161b; --field:#121216;
+  --fg:#ffffff; --fg-2:#d6d6dc; --muted:#9a9aa4; --line:rgba(255,255,255,.12); --line-2:rgba(255,255,255,.2);
+  --red:#e3000f; --red-2:#ff2a36; --red-deep:#7a0008;
+  --font:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root{
-  --bg:#0e1013; --bg-2:#14171b; --surface:#171a1f; --raised:#1d2127;
-  --fg:#eceef0; --fg-2:#c3c8ce; --muted:#878f98; --line:#272c33; --line-2:#343a42;
-  --accent:#9cc0e3; --accent-ink:#0d1a26; --accent-tint:#1b2633;
-  --sheen-a:#262b32; --sheen-b:#15181c;
-  --shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 24px 48px -28px rgba(0,0,0,.8);
-  color-scheme:dark}}
-
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--ui);font-size:15px;line-height:1.5;
-  background-image:radial-gradient(1200px 500px at 85% -10%, var(--bg-2), transparent 70%);min-height:100vh}
-.wrap{max-width:1080px;margin:0 auto;
-  padding-block:max(40px,env(safe-area-inset-top,0px)) max(56px,env(safe-area-inset-bottom,0px));
-  padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.45;overflow-x:hidden;
+  background-image:
+    radial-gradient(700px 380px at -5% -8%, rgba(227,0,15,.45), transparent 60%),
+    radial-gradient(900px 420px at 105% 105%, rgba(227,0,15,.35), transparent 60%),
+    radial-gradient(1200px 700px at 50% 40%, #16161b, transparent 70%);
+}
+.wrap{max-width:1200px;margin:0 auto;
+  padding-block:max(28px,env(safe-area-inset-top,0px)) max(40px,env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font-family:inherit}
+button:focus-visible,input:focus-visible{outline:2px solid var(--red-2);outline-offset:2px}
+svg{flex:none}
 
-/* Cabeçalho */
-.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:36px}
-.eyebrow{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
-h1{font-family:var(--display);font-weight:400;font-size:clamp(38px,6vw,56px);line-height:1;letter-spacing:-.015em;margin:0;text-wrap:balance}
-h1 em{font-style:italic;color:var(--fg-2)}
-.lede{color:var(--muted);max-width:34ch;margin:0;font-size:14px}
+/* ===== Cabeçalho ===== */
+.top{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:0 8px 30px}
+.brand{display:flex;align-items:center;gap:28px;min-width:0}
+.brand img{height:84px;width:auto;display:block}
+.brand .sep{width:2px;align-self:stretch;background:var(--line-2);border-radius:2px}
+.brand h1{margin:0;font-weight:500;font-size:clamp(24px,3.2vw,40px);line-height:1.1;letter-spacing:-.01em}
+.brand h1 b{color:var(--red-2);font-style:italic;font-weight:800}
+.brand p{margin:4px 0 0;font-style:italic;color:var(--fg-2);font-size:clamp(15px,1.8vw,24px)}
+.flags{display:flex;align-items:center;gap:18px}
+.flags .sep{width:1px;height:44px;background:var(--line-2)}
+@media (max-width:720px){
+  .brand{gap:16px}.brand img{height:58px}
+  .top .flags{display:none}
+}
+@media (max-width:460px){.brand{flex-direction:column;align-items:flex-start;gap:10px}.brand .sep{display:none}}
 
-/* Grade principal */
-.layout{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:24px;align-items:start}
-@media (max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}}
+/* Marcas de bandeira (aceitação) */
+.visa{font-weight:800;font-style:italic;font-size:34px;letter-spacing:-.02em;color:#fff;line-height:1}
+.mc{display:grid;justify-items:center;gap:2px}
+.mc .c{display:flex}
+.mc .c i{width:30px;height:30px;border-radius:50%;display:block}
+.mc .c i:first-child{background:#eb001b}
+.mc .c i:last-child{background:#f79e1b;margin-left:-12px;mix-blend-mode:screen}
+.mc span{font-size:12px;font-weight:600;color:#fff;letter-spacing:.01em}
 
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
-.panel-in{padding:24px}
-.sticky{position:sticky;top:max(20px,env(safe-area-inset-top,0px))}
-@media (max-width:860px){.sticky{position:static}}
+/* ===== Grade ===== */
+.layout{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line-2);border-radius:22px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 30px 60px -30px rgba(0,0,0,.9)}
+.side{padding:24px 18px 20px}
+.h{display:flex;align-items:center;gap:12px;font-weight:600;font-size:19px;margin:0 0 16px}
+.h svg{width:26px;height:26px;color:var(--fg-2)}
+.rule{height:1px;background:var(--line);margin:22px 8px}
 
-.label{display:block;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-
-/* Seletor Novo / Seminovo */
-.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:26px}
-.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:10px;background:var(--raised);
-  box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--line-2)}
-.seg[data-tipo="seminovo"] .thumb{transform:translateX(100%)}
-.seg button{position:relative;z-index:1;font:inherit;font-weight:600;font-size:14px;border:0;background:transparent;color:var(--muted);
-  padding:12px 8px;border-radius:10px;cursor:pointer;display:grid;gap:1px;justify-items:center}
-.seg button small{font-weight:500;font-size:11px;letter-spacing:.02em;color:var(--muted)}
-.seg button[aria-pressed="true"]{color:var(--fg)}
+/* Seleção de aparelho */
+.devices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dev{position:relative;border:1px solid var(--line-2);background:linear-gradient(180deg,#26262c,#18181d);color:var(--fg);border-radius:16px;
+  padding:22px 8px 18px;cursor:pointer;display:grid;justify-items:center;gap:6px;text-align:center}
+.dev svg.ph{width:30px;height:30px}
+.dev strong{font-size:18px;font-weight:600;line-height:1.15}
+.dev small{font-size:13.5px;color:var(--fg-2)}
+.dev .ok{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:#fff;color:var(--red);display:none;place-items:center}
+.dev[aria-pressed="true"]{border-color:var(--red-2);background:linear-gradient(160deg,#ff2632 0%,#c4000d 55%,#8e0009 100%);
+  box-shadow:0 0 0 1px rgba(255,60,70,.6),0 0 24px rgba(227,0,15,.55)}
+.dev[aria-pressed="true"] .ok{display:grid}
+.dev[aria-pressed="true"] small{color:#fff}
 
 /* Campos */
-.fields{display:grid;gap:18px}
-.field{display:grid;gap:8px;min-width:0}
-.money{display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line-2);padding:4px 2px 10px}
-.money:focus-within{border-bottom-color:var(--accent)}
-.money span{font-size:15px;color:var(--muted);font-weight:500}
-.money input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--fg);
-  font-family:var(--display);font-size:34px;line-height:1.1;padding:0;width:100%;font-variant-numeric:tabular-nums}
-.hint{font-size:12px;color:var(--muted);margin:0}
+.field-h{display:flex;align-items:center;gap:12px;font-weight:600;font-size:19px;margin:0 6px 12px}
+.field-h svg{width:26px;height:26px;color:var(--fg-2)}
+.input{display:flex;align-items:center;gap:10px;background:var(--field);border:1px solid var(--line-2);border-radius:12px;padding:12px 20px;margin:0 6px}
+.input:focus-within{border-color:var(--red-2);box-shadow:0 0 0 3px rgba(227,0,15,.25)}
+.input span{font-size:22px;color:var(--fg-2)}
+.input input{flex:1;min-width:0;width:100%;border:0;outline:0;background:transparent;color:var(--fg);font:700 32px/1.1 var(--font);padding:0;font-variant-numeric:tabular-nums}
+.note{display:flex;gap:12px;align-items:flex-start;color:var(--fg-2);font-size:14px;margin:14px 10px 0}
+.note svg{width:22px;height:22px;margin-top:1px}
 
-.saldo{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:22px;padding-top:18px;border-top:1px dashed var(--line-2)}
-.saldo span{font-size:13px;color:var(--muted)}
-.saldo b{font-weight:600;font-size:17px;font-variant-numeric:tabular-nums}
+.saldo{display:flex;align-items:center;gap:18px;margin:22px 0 0;padding:16px 22px;border-radius:16px;border:1px solid rgba(255,60,70,.7);
+  background:linear-gradient(120deg,#d1000e 0%,#8f0009 60%,#5c0006 100%);box-shadow:0 0 26px rgba(227,0,15,.4)}
+.saldo svg{width:34px;height:34px;color:#fff;opacity:.9}
+.saldo div{display:grid;flex:1;justify-items:center}
+.saldo small{font-size:17px;font-weight:600;justify-self:start}
+.saldo b{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
 
-/* Herói: opção escolhida */
-.hero{position:relative;overflow:hidden;border-radius:20px;border:1px solid var(--line-2);
-  background:linear-gradient(135deg,var(--sheen-a) 0%,var(--sheen-b) 55%,var(--sheen-a) 100%);
-  box-shadow:var(--shadow);padding:28px 28px 24px;margin-bottom:24px}
-.hero::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(90deg,transparent 0 2px,rgba(127,127,127,.035) 2px 3px)}
-.hero-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--accent);background:var(--accent-tint);padding:6px 10px;border-radius:999px}
-.chip i{width:6px;height:6px;border-radius:50%;background:currentColor}
-.hero-num{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:18px 0 6px}
-.hero-num .n{font-family:var(--display);font-size:clamp(40px,6vw,56px);line-height:1;color:var(--fg-2)}
-.hero-num .v{font-family:var(--display);font-size:clamp(52px,9vw,84px);line-height:.95;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.hero-sub{color:var(--muted);font-size:14px;margin:0}
-.hero-sub b{color:var(--fg);font-weight:600}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;position:relative;z-index:1}
-.btn{font:inherit;font-weight:600;font-size:14px;border-radius:12px;padding:11px 18px;cursor:pointer;border:1px solid var(--fg);background:var(--fg);color:var(--bg);
-  display:inline-flex;align-items:center;gap:8px}
-.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line-2)}
-.btn svg{width:16px;height:16px}
+/* ===== Destaque ===== */
+.hero{position:relative;overflow:hidden;padding:26px 26px 24px;margin-bottom:18px;
+  background:radial-gradient(500px 260px at 85% 30%,rgba(227,0,15,.45),transparent 70%),var(--panel)}
+.chip{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#ff2632,#c4000d);border:1px solid rgba(255,90,100,.7);
+  color:#fff;font-weight:600;font-size:15px;letter-spacing:.04em;text-transform:uppercase;padding:6px 18px;border-radius:12px;box-shadow:0 0 18px rgba(227,0,15,.45)}
+.chip svg{width:18px;height:18px}
+.big{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;white-space:nowrap;margin:16px 0 8px;position:relative;z-index:1}
+.big .n{font-size:clamp(36px,5vw,56px);font-weight:700;line-height:1}
+.big .n small{font-size:.62em;font-weight:500}
+.big .v{font-size:clamp(44px,5.6vw,76px);font-weight:700;line-height:.95;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.sub{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;color:var(--fg-2);font-size:16px;margin:0;position:relative;z-index:1}
+.sub b{color:#fff;font-weight:600}
+.sub .bar{width:1px;height:18px;background:var(--line-2)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;position:relative;z-index:1}
+.btn{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:#fff;cursor:pointer;border-radius:12px;padding:12px 20px;
+  border:1px solid rgba(255,90,100,.8);background:linear-gradient(180deg,#ff2632,#c4000d);box-shadow:0 0 22px rgba(227,0,15,.45)}
+.btn.ghost{background:rgba(20,20,24,.7);border-color:var(--line-2);box-shadow:none}
+.btn svg{width:20px;height:20px}
+.phone{position:absolute;right:-30px;top:-10px;width:300px;height:auto;pointer-events:none;opacity:.95}
+@media (max-width:1100px){.phone{width:240px;right:-50px;opacity:.6}}
+@media (max-width:640px){.phone{display:none}}
+.hero-text{max-width:calc(100% - 120px)}
+@media (max-width:1100px){.hero-text{max-width:none}}
 
-/* Lista de opções */
-.list-head{display:flex;justify-content:space-between;align-items:baseline;padding:20px 24px 12px}
-.list-head h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0}
-.list-head span{font-size:12px;color:var(--muted)}
-@media (max-width:560px){.list-head span{display:none}}
-.opts{list-style:none;margin:0;padding:0 12px 12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px}
-@media (max-width:560px){.opts{grid-template-columns:minmax(0,1fr)}}
-.opt{width:100%;font:inherit;color:inherit;text-align:left;border:1px solid transparent;background:transparent;border-radius:12px;cursor:pointer;
-  display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px 12px}
-.opt:hover{background:var(--bg)}
-.opt .q{font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
-.opt .p{font-weight:600;font-size:16px;font-variant-numeric:tabular-nums}
-.opt .t{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
-.opt[aria-pressed="true"]{background:var(--accent-tint);border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
-.opt[aria-pressed="true"] .q{color:var(--accent)}
-.opt.debito{grid-column:1/-1;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;margin-bottom:6px;padding-bottom:14px}
-.opt.debito[aria-pressed="true"]{border-radius:12px;border-bottom-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+/* ===== Opções ===== */
+.opts-panel{padding:20px 18px 18px}
+.opts-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 8px 14px}
+.opts-head .h{margin:0;font-size:22px}
+.opts-head .h svg{color:var(--red-2);width:34px;height:34px}
+.opts-head span{color:var(--fg-2);font-size:15px}
+.debito{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;color:#fff;cursor:pointer;
+  background:linear-gradient(180deg,#2a2a31,#1c1c22);border:1px solid var(--line-2);border-radius:12px;padding:10px 14px;font-size:19px;font-weight:500}
+.debito b{font-weight:700;font-variant-numeric:tabular-nums}
+.grid-opts{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(9,auto);grid-auto-flow:column;column-gap:44px;margin-top:10px;position:relative}
+.grid-opts::before{content:"";position:absolute;left:50%;top:8px;bottom:8px;width:1px;background:var(--line-2)}
+@media (max-width:620px){.grid-opts{grid-template-columns:1fr;grid-template-rows:none;grid-auto-flow:row}.grid-opts::before{display:none}}
+.opt{display:grid;grid-template-columns:52px minmax(0,1fr) auto 22px;align-items:center;gap:8px;width:100%;background:transparent;color:#fff;cursor:pointer;
+  border:1px solid transparent;border-bottom-color:var(--line);border-radius:0;padding:7px 8px;text-align:left}
+.opt .q{font-weight:600;font-size:19px}
+.opt .p{font-weight:700;font-size:19px;font-variant-numeric:tabular-nums}
+.opt .t{font-size:15px;color:var(--fg-2);font-variant-numeric:tabular-nums;text-align:right}
+.opt .ck{width:22px;height:22px;border-radius:50%;background:#fff;color:var(--red);display:grid;place-items:center;visibility:hidden}
+.opt .ck svg{width:14px;height:14px}
+.opt:hover{background:rgba(255,255,255,.04)}
+.opt[aria-pressed="true"],.debito[aria-pressed="true"]{border:1px solid var(--red-2);border-radius:12px;
+  background:linear-gradient(90deg,rgba(227,0,15,.45),rgba(120,0,8,.35));box-shadow:0 0 18px rgba(227,0,15,.45)}
+.opt[aria-pressed="true"] .ck{visibility:visible}
+@media (max-width:420px){.opt{grid-template-columns:40px minmax(0,1fr) auto 18px}.opt .q,.opt .p{font-size:17px}.opt .t{font-size:13px}}
 
-.foot{margin-top:28px;font-size:12px;color:var(--muted);text-align:center}
+.cards{display:flex;align-items:center;gap:22px;margin-top:22px;padding:16px 26px;border-radius:16px;border:1px solid var(--line-2);background:rgba(18,18,22,.8);flex-wrap:wrap}
+.cards .sep{width:1px;height:46px;background:var(--line-2)}
+.cards .txt{display:flex;align-items:center;gap:14px;flex:1;min-width:220px;color:var(--fg-2);font-size:16px}
+.cards .txt svg{width:34px;height:34px;color:#fff}
+.cards .txt b{color:#fff}
+@media (max-width:520px){.cards .sep{display:none}.cards{justify-content:center}}
 
-button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);
-  padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 10px 30px -10px rgba(0,0,0,.4)}
-textarea{width:100%;min-height:180px;font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}
+.foot{margin-top:28px;color:var(--fg-2);font-size:15px;text-align:center}
+.foot svg{width:20px;height:20px;vertical-align:-4px;margin-right:8px}
 
-@media (prefers-reduced-motion:no-preference){
-  .seg .thumb{transition:transform .28s cubic-bezier(.2,.7,.2,1)}
-  .opt,.btn,.seg button{transition:background .15s,border-color .15s,color .15s}
-  .hero-num .v{transition:opacity .2s}
-}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;
+  background:#fff;color:#111;padding:10px 18px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 10px 30px -8px rgba(0,0,0,.6)}
+textarea{width:100%;min-height:200px;font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--field);color:#fff;border:1px solid var(--line-2);border-radius:12px;padding:12px;margin-top:12px}
+@media (prefers-reduced-motion:no-preference){.dev,.opt,.btn,.debito{transition:background .18s,border-color .18s,box-shadow .18s}}
 </style>
 </head>
 <body>
+<!-- Ícones -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18.5h2"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/></symbol>
+  <symbol id="i-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="9" cy="6" rx="6" ry="2.5"/><path d="M3 6v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V6"/><path d="M3 10v4c0 1.4 2.7 2.5 6 2.5"/><ellipse cx="15" cy="15" rx="6" ry="2.5"/><path d="M9 15v3.5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V15"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+  <symbol id="i-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+</svg>
+
 <div class="wrap">
   <header class="top">
-    <div>
-      <p class="eyebrow">Simulador de parcelamento</p>
-      <h1>Seu iPhone, <em>do seu jeito.</em></h1>
+    <div class="brand">
+      <img src="img/logo.png" alt="Ingacel Maringá" width="220" height="100">
+      <span class="sep" aria-hidden="true"></span>
+      <div>
+        <h1>Simulador de <b>Parcelamento</b></h1>
+        <p>Seu iPhone, do seu jeito.</p>
+      </div>
     </div>
-    <p class="lede">Escolha o aparelho, informe o valor e a entrada. As opções no débito e no cartão aparecem na hora.</p>
+    <div class="flags" aria-label="Bandeiras aceitas: Visa e Mastercard">
+      <span class="visa">VISA</span><span class="sep"></span>
+      <span class="mc"><span class="c"><i></i><i></i></span><span>mastercard</span></span>
+    </div>
   </header>
 
   <main class="layout">
-    <!-- Entrada de dados -->
-    <section class="panel sticky" aria-label="Dados da simulação">
-      <div class="panel-in">
-        <span class="label">Aparelho</span>
-        <div class="seg" id="seg" data-tipo="novo" role="group" aria-label="Tipo de aparelho">
-          <span class="thumb" aria-hidden="true"></span>
-          <button type="button" id="btn-novo" data-tipo="novo" aria-pressed="true">iPhone Novo<small>Lacrado</small></button>
-          <button type="button" id="btn-seminovo" data-tipo="seminovo" aria-pressed="false">iPhone Seminovo<small>Revisado</small></button>
-        </div>
+    <!-- Coluna de dados -->
+    <section class="panel side" aria-label="Dados da simulação">
+      <h2 class="h" style="margin-left:6px"><svg><use href="#i-phone"/></svg>Escolha o aparelho</h2>
+      <div class="devices" role="group" aria-label="Tipo de aparelho">
+        <button type="button" class="dev" id="btn-novo" data-tipo="novo" aria-pressed="true">
+          <span class="ok"><svg width="14" height="14"><use href="#i-check"/></svg></span>
+          <svg class="ph"><use href="#i-phone"/></svg>
+          <strong>iPhone Novo</strong><small>Lacrado • Original</small>
+        </button>
+        <button type="button" class="dev" id="btn-seminovo" data-tipo="seminovo" aria-pressed="false">
+          <span class="ok"><svg width="14" height="14"><use href="#i-check"/></svg></span>
+          <svg class="ph"><use href="#i-phone"/></svg>
+          <strong>iPhone Seminovo</strong><small>Revisado • Garantia</small>
+        </button>
+      </div>
 
-        <div class="fields">
-          <div class="field">
-            <label class="label" for="valor" style="margin:0">Valor a parcelar</label>
-            <div class="money"><span>R$</span><input id="valor" inputmode="decimal" autocomplete="off" value="3.000,00"></div>
-          </div>
-          <div class="field">
-            <label class="label" for="entrada" style="margin:0">Valor de entrada</label>
-            <div class="money"><span>R$</span><input id="entrada" inputmode="decimal" autocomplete="off" value="0,00"></div>
-            <p class="hint">A entrada é descontada antes de calcular as parcelas.</p>
-          </div>
-        </div>
+      <div class="rule"></div>
 
-        <div class="saldo"><span>Saldo a parcelar</span><b id="out-saldo">–</b></div>
+      <label class="field-h" for="valor"><svg><use href="#i-card"/></svg>Valor a parcelar</label>
+      <div class="input"><span>R$</span><input id="valor" inputmode="decimal" autocomplete="off" value="3.000,00"></div>
+
+      <div class="rule"></div>
+
+      <label class="field-h" for="entrada"><svg><use href="#i-coins"/></svg>Valor de entrada</label>
+      <div class="input"><span>R$</span><input id="entrada" inputmode="decimal" autocomplete="off" value="0,00"></div>
+      <p class="note"><svg><use href="#i-info"/></svg>A entrada é descontada antes de calcular as parcelas.</p>
+
+      <div class="saldo">
+        <svg><use href="#i-calc"/></svg>
+        <div><small>Saldo a parcelar</small><b id="out-saldo">–</b></div>
       </div>
     </section>
 
-    <!-- Resultado -->
+    <!-- Coluna de resultado -->
     <section aria-label="Resultado">
-      <div class="hero" aria-live="polite">
-        <div class="hero-top">
-          <span class="chip"><i></i><span id="hero-tipo">iPhone Novo</span></span>
-        </div>
-        <div class="hero-num"><span class="n" id="hero-n">12x</span><span class="v" id="hero-v">–</span></div>
-        <p class="hero-sub" id="hero-sub">–</p>
-        <div class="actions">
-          <button class="btn" id="copiar" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
-            Copiar simulação completa
-          </button>
-          <button class="btn ghost" id="copiar-um" type="button">Copiar só esta opção</button>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="list-head"><h2>Opções de pagamento</h2><span>Toque para destacar</span></div>
-        <ul class="opts" id="opts"></ul>
-      </div>
-
-      <div id="copybox" class="panel" hidden style="margin-top:24px">
-        <div class="panel-in">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-            <strong>Texto da simulação</strong>
-            <button class="btn ghost" id="fechar" type="button">Fechar</button>
+      <div class="panel hero" aria-live="polite">
+        <svg class="phone" viewBox="0 0 300 320" aria-hidden="true">
+          <defs>
+            <linearGradient id="body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5a62"/><stop offset=".45" stop-color="#2a2a30"/><stop offset="1" stop-color="#121216"/></linearGradient>
+            <linearGradient id="edge" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9a9aa2"/><stop offset=".5" stop-color="#3a3a40"/><stop offset="1" stop-color="#ff2a36"/></linearGradient>
+            <radialGradient id="lens" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#3b4a66"/><stop offset=".5" stop-color="#0d0f16"/><stop offset="1" stop-color="#000"/></radialGradient>
+          </defs>
+          <g transform="rotate(-28 160 160)">
+            <rect x="70" y="20" width="190" height="380" rx="38" fill="url(#edge)"/>
+            <rect x="76" y="26" width="178" height="368" rx="33" fill="url(#body)"/>
+            <rect x="92" y="42" width="100" height="104" rx="26" fill="#1c1c21" stroke="#4a4a52" stroke-width="1.5"/>
+            <g stroke="#6a6a72" stroke-width="3">
+              <circle cx="120" cy="70" r="19" fill="url(#lens)"/>
+              <circle cx="120" cy="118" r="19" fill="url(#lens)"/>
+              <circle cx="164" cy="94" r="19" fill="url(#lens)"/>
+            </g>
+            <circle cx="168" cy="126" r="5" fill="#2b2b30"/>
+            <circle cx="168" cy="62" r="4" fill="#d9c9a0" opacity=".7"/>
+          </g>
+        </svg>
+        <div class="hero-text">
+          <span class="chip"><svg><use href="#i-phone"/></svg><span id="hero-tipo">iPhone Novo</span></span>
+          <div class="big"><span class="n" id="hero-n">12x <small>de</small></span><span class="v" id="hero-v">–</span></div>
+          <p class="sub" id="hero-sub">–</p>
+          <div class="actions">
+            <button class="btn" id="copiar" type="button"><svg><use href="#i-copy"/></svg>Copiar simulação completa</button>
+            <button class="btn ghost" id="copiar-um" type="button"><svg><use href="#i-copy"/></svg>Copiar só esta opção</button>
           </div>
-          <textarea id="copytext" readonly></textarea>
         </div>
+      </div>
+
+      <div class="panel opts-panel">
+        <div class="opts-head">
+          <h2 class="h"><svg><use href="#i-card"/></svg>Opções de pagamento</h2>
+          <span>Valores no cartão de crédito</span>
+        </div>
+        <button type="button" class="debito" data-n="0" aria-pressed="false"><span>Débito</span><b id="out-debito">–</b></button>
+        <div class="grid-opts" id="opts"></div>
+
+        <div class="cards">
+          <span class="visa">VISA</span><span class="sep" aria-hidden="true"></span>
+          <span class="mc"><span class="c"><i></i><i></i></span><span>mastercard</span></span>
+          <span class="sep" aria-hidden="true"></span>
+          <span class="txt"><svg><use href="#i-card"/></svg><span>Parcele no cartão de crédito com as bandeiras <b>Visa e Mastercard</b>.</span></span>
+        </div>
+      </div>
+
+      <div id="copybox" class="panel side" hidden style="margin-top:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <strong>Texto da simulação</strong>
+          <button class="btn ghost" id="fechar" type="button" style="padding:8px 16px">Fechar</button>
+        </div>
+        <textarea id="copytext" readonly></textarea>
       </div>
     </section>
   </main>
 
-  <p class="foot">Valores sujeitos à aprovação da operadora do cartão.</p>
+  <p class="foot"><svg><use href="#i-info"/></svg>Valores sujeitos à aprovação da operadora do cartão.</p>
 </div>
 <div class="toast" id="toast" hidden></div>
 
@@ -244,6 +326,7 @@ function num(id){
   else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g,'');
   const n = parseFloat(s); return isNaN(n) ? 0 : n;
 }
+const CK = '<span class="ck"><svg><use href="#i-check"/></svg></span>';
 
 function calcular(){
   const cfg = CONFIG[tipo];
@@ -260,41 +343,41 @@ function calcular(){
   });
   ultimo = {nome: cfg.nome, entrada, saldo, debito, linhas};
   $('out-saldo').textContent = brl(saldo);
+  $('out-debito').textContent = brl(debito);
   desenhar();
 }
 
 function desenhar(){
   const s = ultimo;
-  let h = `<li style="grid-column:1/-1"><button type="button" class="opt debito" data-n="0" aria-pressed="${escolha===0}">
-      <span class="q">Débito</span><span></span><span class="p">${brl(s.debito)}</span></button></li>`;
-  for(const l of s.linhas){
-    h += `<li><button type="button" class="opt" data-n="${l.n}" aria-pressed="${escolha===l.n}">
-      <span class="q">${l.n}x</span><span class="p">${brl(l.parcela)}</span><span class="t">${brl(l.total)}</span></button></li>`;
-  }
-  $('opts').innerHTML = h;
+  $('opts').innerHTML = s.linhas.map(l =>
+    `<button type="button" class="opt" data-n="${l.n}" aria-pressed="${escolha===l.n}">
+       <span class="q">${l.n}x</span><span class="p">${brl(l.parcela)}</span><span class="t">${brl(l.total)}</span>${CK}</button>`).join('');
+  document.querySelector('.debito').setAttribute('aria-pressed', escolha===0);
 
   $('hero-tipo').textContent = s.nome;
+  const ent = s.entrada>0 ? `<span class="bar"></span><span>+ Entrada de: <b>${brl(s.entrada)}</b></span>` : '';
   if(escolha === 0){
-    $('hero-n').textContent = 'Débito';
+    $('hero-n').innerHTML = 'Débito';
     $('hero-v').textContent = brl(s.debito);
-    $('hero-sub').innerHTML = 'Pagamento à vista no cartão de débito.' + (s.entrada>0 ? ` Entrada de <b>${brl(s.entrada)}</b>.` : '');
+    $('hero-sub').innerHTML = `<span>À vista no cartão de débito</span>${ent}`;
   } else {
     const l = s.linhas[escolha-1];
-    $('hero-n').textContent = `${l.n}x`;
+    $('hero-n').innerHTML = `${l.n}x <small>de</small>`;
     $('hero-v').textContent = brl(l.parcela);
-    $('hero-sub').innerHTML = `Total no cartão <b>${brl(l.total)}</b>` + (s.entrada>0 ? ` + entrada de <b>${brl(s.entrada)}</b>` : '') + '.';
+    $('hero-sub').innerHTML = `<span>Total no cartão: <b>${brl(l.total)}</b></span>${ent}`;
   }
 }
 
 function textoCompleto(){
-  const s = ultimo; let t = `*Simulação de pagamento – ${s.nome}*\n`;
+  const s = ultimo; let t = `*Ingacel Maringá – Simulação ${s.nome}*\n`;
   if(s.entrada>0) t += `Entrada: ${brl(s.entrada)}\n`;
   t += `\nDébito: ${brl(s.debito)}\n`;
   s.linhas.forEach(l => t += `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})\n`);
+  t += `\n_Valores sujeitos à aprovação da operadora do cartão._`;
   return t;
 }
 function textoUm(){
-  const s = ultimo; let t = `*${s.nome}*\n`;
+  const s = ultimo; let t = `*Ingacel Maringá – ${s.nome}*\n`;
   if(s.entrada>0) t += `Entrada: ${brl(s.entrada)}\n`;
   if(escolha===0) t += `Débito: ${brl(s.debito)}`;
   else { const l = s.linhas[escolha-1]; t += `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})`; }
@@ -311,13 +394,12 @@ function copiar(txt){
 $('copiar').addEventListener('click', () => copiar(textoCompleto()));
 $('copiar-um').addEventListener('click', () => copiar(textoUm()));
 $('fechar').addEventListener('click', () => $('copybox').hidden = true);
-$('opts').addEventListener('click', e => {
-  const b = e.target.closest('.opt'); if(!b) return;
+document.addEventListener('click', e => {
+  const b = e.target.closest('.opt, .debito'); if(!b) return;
   escolha = +b.dataset.n; desenhar();
 });
 document.querySelectorAll('button[data-tipo]').forEach(b => b.addEventListener('click', () => {
   tipo = b.dataset.tipo;
-  $('seg').dataset.tipo = tipo;
   document.querySelectorAll('button[data-tipo]').forEach(x => x.setAttribute('aria-pressed', x === b));
   calcular();
 }));

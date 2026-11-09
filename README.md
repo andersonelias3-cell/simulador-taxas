@@ -1,6 +1,6 @@
 # Simulador de Taxas
 
-Simulador de parcelamento no cartão (débito e 1x a 18x). O cliente informa o valor e a entrada; o Simples Nacional e as taxas da maquininha são aplicados internamente.
+Simulador de parcelamento da Ingacel Maringá no cartão (débito e 1x a 18x). O cliente informa o valor e a entrada; o Simples Nacional e as taxas da maquininha são aplicados internamente.
 
 **Acesse:** https://andersonelias3-cell.github.io/simulador-taxas/
 
