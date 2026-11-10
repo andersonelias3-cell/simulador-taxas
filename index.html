@@ -94,6 +94,7 @@ svg{flex:none}
 .btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:#fff;cursor:pointer;border-radius:10px;padding:10px 14px;
   border:1px solid rgba(255,80,90,.7);background:linear-gradient(180deg,#f0222e,#c9000d)}
 .btn.ghost{background:var(--field);border-color:var(--line-2)}
+.btn{text-decoration:none}
 .btn.wa{background:#1fa855;border-color:#29c766;text-decoration:none}
 .btn.big{font-size:14px;font-weight:600;padding:12px 18px}
 .btn svg{width:15px;height:15px}
@@ -128,7 +129,7 @@ svg{flex:none}
 
 .modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.72);display:grid;place-items:center;
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-.modal-box{width:min(440px,100%);max-height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px;background:var(--panel);border:1px solid var(--line-2);border-radius:16px;padding:14px}
+.modal-box{width:min(440px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:12px;background:var(--panel);border:1px solid var(--line-2);border-radius:16px;padding:14px}
 .modal-box header{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .modal-box header strong{font-size:15px}
 .modal-box .x{background:none;border:0;color:var(--fg-2);font-size:24px;line-height:1;cursor:pointer;padding:0 4px}
@@ -136,6 +137,10 @@ svg{flex:none}
 .modal-box .prev img{display:block;width:100%;height:auto}
 .modal-box .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .modal-box .acts .btn{justify-content:center}
+.modal-box .fone label{display:block;font-size:12px;color:var(--fg-2);margin:0 0 6px}
+.modal-box .fone .input{padding:8px 12px}
+.modal-box .fone .input input{font-size:16px;font-weight:600}
+.modal-box .acts .btn.full{grid-column:1/-1}
 .modal-box .tip{grid-column:1/-1;color:var(--muted);font-size:11.5px;margin:0;text-align:center}
 .foot{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
 
@@ -237,10 +242,15 @@ textarea{width:100%;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,monospac
   <div class="modal-box">
     <header><strong id="modal-t">Orçamento pronto para enviar</strong><button class="x" id="modal-x" type="button" aria-label="Fechar">×</button></header>
     <div class="prev"><img id="modal-img" alt="Imagem do orçamento"></div>
+    <div class="fone" id="fone-box">
+      <label for="fone">WhatsApp do cliente <span class="pill">opcional</span></label>
+      <div class="input"><span>+55</span><input id="fone" type="tel" inputmode="tel" autocomplete="off" placeholder="(44) 99999-9999"></div>
+    </div>
     <div class="acts">
-      <button class="btn big" id="compartilhar" type="button"><svg><use href="#i-send"/></svg>Compartilhar</button>
-      <a class="btn big ghost" id="baixar" download="orcamento-ingacel.png" href="#"><svg><use href="#i-down"/></svg>Baixar imagem</a>
-      <p class="tip" id="modal-tip">Toque em Compartilhar e escolha o WhatsApp do cliente.</p>
+      <button class="btn big wa full" id="web" type="button"><svg><use href="#i-chat"/></svg>Copiar imagem e abrir WhatsApp Web</button>
+      <button class="btn big wa full" id="compartilhar" type="button"><svg><use href="#i-chat"/></svg>Enviar pelo WhatsApp</button>
+      <a class="btn big ghost full" id="baixar" download="orcamento-ingacel.png" href="#"><svg><use href="#i-down"/></svg>Baixar imagem</a>
+      <p class="tip" id="modal-tip"></p>
     </div>
   </div>
 </div>
@@ -426,6 +436,15 @@ async function gerarImagem(){
   return out;
 }
 let imgBlob = null, imgUrl = null;
+function ehCelular(){
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+}
+function foneWa(){
+  let d = $('fone').value.replace(/\D/g,'');
+  if(!d) return '';
+  if(d.length <= 11) d = '55' + d;
+  return d;
+}
 async function abrirOrcamento(){
   const cv = await gerarImagem();
   imgBlob = await new Promise(r => cv.toBlob(r, 'image/png'));
@@ -433,9 +452,14 @@ async function abrirOrcamento(){
   imgUrl = URL.createObjectURL(imgBlob);
   $('modal-img').src = imgUrl; $('baixar').href = imgUrl;
   const file = new File([imgBlob], 'orcamento-ingacel.png', {type:'image/png'});
-  const pode = !!(navigator.canShare && navigator.canShare({files:[file]}));
-  $('compartilhar').hidden = !pode;
-  $('modal-tip').textContent = pode ? 'Toque em Compartilhar e escolha o WhatsApp do cliente.' : 'Baixe a imagem e anexe na conversa do cliente no WhatsApp.';
+  const podeShare = !!(navigator.canShare && navigator.canShare({files:[file]}));
+  const celular = ehCelular() && podeShare;
+  $('compartilhar').hidden = !celular;
+  $('web').hidden = celular;
+  $('fone-box').hidden = celular;
+  $('modal-tip').textContent = celular
+    ? 'Toque em Enviar pelo WhatsApp e escolha a conversa do cliente.'
+    : 'A imagem é copiada e o WhatsApp Web abre numa nova aba. Na conversa do cliente, aperte Ctrl + V e envie.';
   $('modal').hidden = false;
 }
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,1800); }
@@ -453,6 +477,24 @@ $('compartilhar').addEventListener('click', async () => {
   const file = new File([imgBlob], 'orcamento-ingacel.png', {type:'image/png'});
   try{ await navigator.share({files:[file], title:'Orçamento Ingácel'}); }
   catch(e){ if(e && e.name !== 'AbortError') toast('Não deu para compartilhar. Use Baixar imagem.'); }
+});
+$('web').addEventListener('click', async () => {
+  const fone = foneWa();
+  const url = 'https://web.whatsapp.com/' + (fone ? 'send?phone=' + fone : '');
+  let copiou = false;
+  try{
+    if(navigator.clipboard && window.ClipboardItem){
+      await navigator.clipboard.write([new ClipboardItem({'image/png': imgBlob})]);
+      copiou = true;
+    }
+  }catch(e){}
+  if(!copiou) $('baixar').click();
+  const w = window.open(url, 'whatsapp-web');
+  if(!w) location.href = url;
+  toast(copiou ? 'Imagem copiada! Na conversa, aperte Ctrl + V' : 'Imagem baixada. Arraste para a conversa do cliente');
+  $('modal-tip').textContent = copiou
+    ? 'Imagem copiada. No WhatsApp Web, abra a conversa do cliente, aperte Ctrl + V e envie.'
+    : 'Seu navegador não deixou copiar a imagem. Ela foi baixada: arraste o arquivo para a conversa do cliente.';
 });
 const fecharModal = () => $('modal').hidden = true;
 $('modal-x').addEventListener('click', fecharModal);
