@@ -86,12 +86,16 @@ svg{flex:none}
 .big .n{font-size:clamp(28px,4vw,38px);font-weight:700;line-height:1}
 .big .n small{font-size:.5em;font-weight:500;color:var(--fg-2)}
 .big .v{font-size:clamp(30px,4.4vw,42px);font-weight:700;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-.sub{color:var(--fg-2);font-size:12px;margin:6px 0 0}
-.sub b{color:#fff;font-weight:600}
+.sub{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;color:var(--fg-2);font-size:14px;margin:12px 0 0;
+  background:rgba(255,255,255,.06);border:1px solid var(--line-2);border-radius:10px;padding:8px 12px}
+.sub b{color:#fff;font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+.sub .e{color:var(--muted);font-size:13px}.sub .e b{font-size:14px;font-weight:600}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:#fff;cursor:pointer;border-radius:10px;padding:10px 14px;
   border:1px solid rgba(255,80,90,.7);background:linear-gradient(180deg,#f0222e,#c9000d)}
 .btn.ghost{background:var(--field);border-color:var(--line-2)}
+.btn.wa{background:#1fa855;border-color:#29c766;text-decoration:none}
+.btn.big{font-size:14px;font-weight:600;padding:12px 18px}
 .btn svg{width:15px;height:15px}
 
 /* ===== Opções ===== */
@@ -108,19 +112,31 @@ svg{flex:none}
 .debito b{margin-left:auto;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
 .grid-opts{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(9,auto);grid-auto-flow:column;gap:8px}
 @media (max-width:560px){.grid-opts{grid-template-columns:1fr;grid-template-rows:none;grid-auto-flow:row}}
-.opt{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:6px;width:100%;color:#fff;cursor:pointer;text-align:left;
+.opt{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;color:#fff;cursor:pointer;text-align:left;
   background:var(--field);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
 .opt .q{font-size:13px;font-weight:600;color:var(--muted)}
 .opt .val{display:grid;min-width:0}
-.opt .p{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.opt .p{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .opt .p small{font-size:10px;font-weight:500;color:var(--red-2);margin-right:4px}
-.opt .t{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
-.opt .pct{font-size:10px;font-weight:600;color:var(--fg-2);background:rgba(255,255,255,.06);border:1px solid var(--line);padding:2px 7px;border-radius:999px;font-variant-numeric:tabular-nums}
+.opt .tot{display:grid;justify-items:end;line-height:1.15}
+.opt .tot small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.opt .tot b{font-size:15px;font-weight:600;color:var(--fg-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.opt[aria-pressed="true"] .tot b{color:#fff}
 .opt:hover,.debito:hover{border-color:var(--line-2);background:#17171b}
 .opt[aria-pressed="true"],.debito[aria-pressed="true"]{border-color:var(--red-2);background:linear-gradient(90deg,rgba(227,0,15,.22),rgba(227,0,15,.06));box-shadow:0 0 0 1px rgba(255,42,54,.35),0 8px 24px -12px rgba(227,0,15,.7)}
 .opt[aria-pressed="true"] .q{color:var(--red-2)}
-.opt[aria-pressed="true"] .pct{background:var(--red);border-color:var(--red-2);color:#fff}
 
+.modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.72);display:grid;place-items:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.modal-box{width:min(440px,100%);max-height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px;background:var(--panel);border:1px solid var(--line-2);border-radius:16px;padding:14px}
+.modal-box header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.modal-box header strong{font-size:15px}
+.modal-box .x{background:none;border:0;color:var(--fg-2);font-size:24px;line-height:1;cursor:pointer;padding:0 4px}
+.modal-box .prev{overflow:auto;border-radius:10px;border:1px solid var(--line);background:#000}
+.modal-box .prev img{display:block;width:100%;height:auto}
+.modal-box .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modal-box .acts .btn{justify-content:center}
+.modal-box .tip{grid-column:1/-1;color:var(--muted);font-size:11.5px;margin:0;text-align:center}
 .foot{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
 
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:20;
@@ -136,6 +152,9 @@ textarea{width:100%;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,monospac
   <symbol id="i-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/></symbol>
   <symbol id="i-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="2.8"/><path d="M5 6v4c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6"/><path d="M5 10v4c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-4"/><path d="M5 14v4c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-4"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.5a8.5 8.5 0 0 1-12.4 7.6L3.5 20.5l1.4-4.4A8.5 8.5 0 1 1 20.5 11.5z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>
 
@@ -187,8 +206,9 @@ textarea{width:100%;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,monospac
         <div class="big"><span class="n" id="hero-n">12x <small>de</small></span><span class="v" id="hero-v">–</span></div>
         <p class="sub" id="hero-sub">–</p>
         <div class="actions">
-          <button class="btn" id="copiar" type="button"><svg><use href="#i-copy"/></svg>Copiar simulação completa</button>
-          <button class="btn ghost" id="copiar-um" type="button"><svg><use href="#i-copy"/></svg>Copiar só esta opção</button>
+          <button class="btn big" id="enviar" type="button"><svg><use href="#i-send"/></svg>Enviar orçamento (imagem)</button>
+          <a class="btn big wa" id="whats" href="https://wa.me/" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Enviar texto no WhatsApp</a>
+          <button class="btn big ghost" id="copiar" type="button"><svg><use href="#i-copy"/></svg>Copiar texto</button>
         </div>
       </div>
 
@@ -212,6 +232,17 @@ textarea{width:100%;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,monospac
   </main>
 
   <p class="foot">Valores sujeitos à aprovação da operadora do cartão.</p>
+</div>
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="modal-box">
+    <header><strong id="modal-t">Orçamento pronto para enviar</strong><button class="x" id="modal-x" type="button" aria-label="Fechar">×</button></header>
+    <div class="prev"><img id="modal-img" alt="Imagem do orçamento"></div>
+    <div class="acts">
+      <button class="btn big" id="compartilhar" type="button"><svg><use href="#i-send"/></svg>Compartilhar</button>
+      <a class="btn big ghost" id="baixar" download="orcamento-ingacel.png" href="#"><svg><use href="#i-down"/></svg>Baixar imagem</a>
+      <p class="tip" id="modal-tip">Toque em Compartilhar e escolha o WhatsApp do cliente.</p>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast" hidden></div>
 
@@ -245,7 +276,6 @@ let ultimo = null;
 const $ = id => document.getElementById(id);
 const brl = v => isFinite(v) ? v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '–';
 const fmt = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-const pct = v => '+' + v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) + '%';
 function num(id){
   let s = String($(id).value).trim().replace(/[^\d,.\-]/g,'');
   if(s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
@@ -264,9 +294,9 @@ function calcular(){
   const linhas = cfg.parcelas.map((taxa, i) => {
     const bruto = base / (100 - taxa) * 100;
     const total = bruto + (bruto - base) * cfg.simplesAcrescimo/100;
-    return {n:i+1, total, parcela: total/(i+1), acr: saldo > 0 ? (total/saldo - 1)*100 : 0};
+    return {n:i+1, total, parcela: total/(i+1)};
   });
-  ultimo = {nome: cfg.nome, entrada, saldo, debito, linhas};
+  ultimo = {nome: cfg.nome, valor, entrada, saldo, debito, linhas};
   $('out-saldo').textContent = brl(saldo);
   $('out-debito').textContent = brl(debito);
   desenhar();
@@ -277,38 +307,136 @@ function desenhar(){
   $('opts').innerHTML = s.linhas.map(l =>
     `<button type="button" class="opt" data-n="${l.n}" aria-pressed="${escolha===l.n}">
        <span class="q">${l.n}x</span>
-       <span class="val"><span class="p"><small>de</small>${brl(l.parcela)}</span><span class="t">Total ${brl(l.total)}</span></span>
-       <span class="pct">${pct(l.acr)}</span></button>`).join('');
+       <span class="p"><small>de</small>${brl(l.parcela)}</span>
+       <span class="tot"><small>Total</small><b>${brl(l.total)}</b></span></button>`).join('');
   document.querySelector('.debito').setAttribute('aria-pressed', escolha===0);
 
   $('hero-tipo').textContent = s.nome;
-  const ent = s.entrada>0 ? ` &nbsp;·&nbsp; Entrada: <b>${brl(s.entrada)}</b>` : '';
+  const ent = s.entrada>0 ? `<span class="e">+ entrada <b>${brl(s.entrada)}</b></span>` : '';
   if(escolha === 0){
     $('hero-n').innerHTML = 'Débito';
     $('hero-v').textContent = brl(s.debito);
-    $('hero-sub').innerHTML = `À vista no cartão de débito${ent}`;
+    $('hero-sub').innerHTML = `<span>Total no débito:</span><b>${brl(s.debito)}</b>${ent}`;
   } else {
     const l = s.linhas[escolha-1];
     $('hero-n').innerHTML = `${l.n}x <small>de</small>`;
     $('hero-v').textContent = brl(l.parcela);
-    $('hero-sub').innerHTML = `Total no cartão: <b>${brl(l.total)}</b>${ent}`;
+    $('hero-sub').innerHTML = `<span>Total no cartão:</span><b>${brl(l.total)}</b>${ent}`;
   }
 }
 
+function escolhaTxt(s){
+  if(escolha===0) return `Débito: ${brl(s.debito)}`;
+  const l = s.linhas[escolha-1]; return `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})`;
+}
 function textoCompleto(){
-  const s = ultimo; let t = `*Ingácel – Simulação ${s.nome}*\n`;
-  if(s.entrada>0) t += `Entrada: ${brl(s.entrada)}\n`;
-  t += `\nDébito: ${brl(s.debito)}\n`;
-  s.linhas.forEach(l => t += `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})\n`);
+  const s = ultimo;
+  let t = `*Orçamento Ingácel* 📱\n*${s.nome}*\n\n`;
+  t += `Valor do aparelho: *${brl(s.valor)}*\n`;
+  if(s.entrada>0) t += `Entrada: *${brl(s.entrada)}*\nSaldo a parcelar: *${brl(s.saldo)}*\n`;
+  t += `\n✅ *Opção sugerida:* ${escolhaTxt(s)}\n`;
+  t += `\n💳 *Débito:* ${brl(s.debito)}\n\n*Cartão de crédito:*\n`;
+  s.linhas.forEach(l => t += `${l.n}x de ${brl(l.parcela)} — total ${brl(l.total)}\n`);
   t += `\n_Valores sujeitos à aprovação da operadora do cartão._`;
   return t;
 }
-function textoUm(){
-  const s = ultimo; let t = `*Ingácel – ${s.nome}*\n`;
-  if(s.entrada>0) t += `Entrada: ${brl(s.entrada)}\n`;
-  if(escolha===0) t += `Débito: ${brl(s.debito)}`;
-  else { const l = s.linhas[escolha-1]; t += `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})`; }
-  return t;
+
+/* ===== Imagem do orçamento ===== */
+const logoImg = new Image(); logoImg.src = 'img/logo-texto.png';
+function rr(c,x,y,w,h,r){ c.beginPath(); c.roundRect ? c.roundRect(x,y,w,h,r) : c.rect(x,y,w,h); }
+async function gerarImagem(){
+  try{ await Promise.all(['400','500','600','700','800'].map(w => document.fonts.load(`${w} 30px Poppins`))); }catch(e){}
+  if(!logoImg.complete) await new Promise(r => { logoImg.onload = logoImg.onerror = r; });
+  const s = ultimo, W = 1080, P = 64, F = "Poppins, Arial, sans-serif";
+  const H = 1920;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  // fundo
+  c.fillStyle = '#0c0c0f'; c.fillRect(0,0,W,H);
+  let g = c.createRadialGradient(0,0,0,0,0,700); g.addColorStop(0,'rgba(227,0,15,.45)'); g.addColorStop(1,'rgba(227,0,15,0)');
+  c.fillStyle = g; c.fillRect(0,0,W,H);
+  g = c.createRadialGradient(W,H,0,W,H,700); g.addColorStop(0,'rgba(227,0,15,.25)'); g.addColorStop(1,'rgba(227,0,15,0)');
+  c.fillStyle = g; c.fillRect(0,0,W,H);
+  // cabeçalho
+  let y = 70;
+  if(logoImg.naturalWidth){ const lh = 54; c.drawImage(logoImg, P, y, logoImg.naturalWidth*lh/logoImg.naturalHeight, lh); }
+  c.textAlign = 'right'; c.fillStyle = '#fff'; c.font = `700 40px ${F}`; c.fillText('Orçamento', W-P, y+34);
+  c.fillStyle = '#8b8b95'; c.font = `400 24px ${F}`; c.fillText(new Date().toLocaleDateString('pt-BR'), W-P, y+66);
+  c.textAlign = 'left';
+  y = 180;
+  c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 2; c.beginPath(); c.moveTo(P,y); c.lineTo(W-P,y); c.stroke();
+  // aparelho
+  y += 40;
+  c.font = `700 24px ${F}`; const chip = s.nome.toUpperCase(); const cw = c.measureText(chip).width + 40;
+  c.fillStyle = '#e3000f'; rr(c,P,y,cw,48,10); c.fill();
+  c.fillStyle = '#fff'; c.fillText(chip, P+20, y+33);
+  // resumo de valores
+  y += 76;
+  const cols = s.entrada>0 ? [['Valor do aparelho',s.valor],['Entrada',s.entrada],['Saldo a parcelar',s.saldo]] : [['Valor do aparelho',s.valor]];
+  const cwid = (W-2*P-24*(cols.length-1))/cols.length;
+  cols.forEach(([lab,v],i) => {
+    const x = P + i*(cwid+24);
+    c.fillStyle = '#16161a'; rr(c,x,y,cwid,120,18); c.fill(); c.strokeStyle='rgba(255,255,255,.14)'; c.stroke();
+    c.fillStyle = '#9a9aa4'; c.font = `500 22px ${F}`; c.fillText(lab, x+24, y+44);
+    c.fillStyle = '#fff'; c.font = `700 ${cols.length>1?34:44}px ${F}`; c.fillText(brl(v), x+24, y+(cols.length>1?94:98));
+  });
+  // destaque
+  y += 150;
+  g = c.createLinearGradient(P,y,W-P,y+230); g.addColorStop(0,'#d4000e'); g.addColorStop(1,'#6e0007');
+  c.fillStyle = g; rr(c,P,y,W-2*P,230,24); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.85)'; c.font = `600 24px ${F}`; c.fillText('OPÇÃO SUGERIDA', P+36, y+52);
+  let big, tot;
+  if(escolha===0){ big = ['Débito', brl(s.debito)]; tot = brl(s.debito); }
+  else { const l = s.linhas[escolha-1]; big = [`${l.n}x de`, brl(l.parcela)]; tot = brl(l.total); }
+  c.fillStyle = '#fff'; c.font = `700 64px ${F}`; c.fillText(big[0], P+36, y+136);
+  const bw = c.measureText(big[0]+' ').width; c.font = `800 76px ${F}`; c.fillText(big[1], P+36+bw, y+138);
+  c.font = `500 28px ${F}`; c.fillStyle = 'rgba(255,255,255,.9)'; c.fillText('Total:', P+36, y+194);
+  const tw = c.measureText('Total: ').width; c.font = `700 34px ${F}`; c.fillStyle = '#fff'; c.fillText(tot, P+36+tw, y+196);
+  // débito
+  y += 262;
+  c.fillStyle = '#1b1b20'; rr(c,P,y,W-2*P,84,16); c.fill(); c.strokeStyle='rgba(255,255,255,.14)'; c.stroke();
+  c.fillStyle = '#fff'; c.font = `600 30px ${F}`; c.fillText('Débito', P+28, y+53);
+  c.textAlign = 'right'; c.font = `700 34px ${F}`; c.fillText(brl(s.debito), W-P-28, y+55); c.textAlign = 'left';
+  // tabela de parcelas
+  y += 146;
+  c.fillStyle = '#fff'; c.font = `600 28px ${F}`; c.fillText('Cartão de crédito', P, y);
+  c.fillStyle = '#8b8b95'; c.font = `400 22px ${F}`; c.textAlign='right'; c.fillText('parcela  ·  total', W-P, y); c.textAlign='left';
+  y += 24;
+  const colW = (W-2*P-24)/2, rowH = 82;
+  s.linhas.forEach((l,i) => {
+    const col = i<9 ? 0 : 1, row = i%9;
+    const x = P + col*(colW+24), yy = y + row*rowH;
+    const sel = l.n===escolha;
+    c.fillStyle = sel ? 'rgba(227,0,15,.28)' : '#121216'; rr(c,x,yy,colW,rowH-10,14); c.fill();
+    c.strokeStyle = sel ? '#ff2a36' : 'rgba(255,255,255,.08)'; c.lineWidth = 2; c.stroke();
+    const my = yy + (rowH-10)/2;
+    c.fillStyle = sel ? '#ff2a36' : '#8b8b95'; c.font = `600 26px ${F}`; c.fillText(`${l.n}x`, x+20, my+9);
+    c.fillStyle = '#fff'; c.font = `700 29px ${F}`; c.fillText(brl(l.parcela), x+82, my+10);
+    c.textAlign = 'right'; c.fillStyle = sel ? '#fff' : '#c9c9d1'; c.font = `600 24px ${F}`; c.fillText(brl(l.total), x+colW-18, my+9); c.textAlign = 'left';
+  });
+  y += 9*rowH + 30;
+  c.fillStyle = '#8b8b95'; c.font = `400 22px ${F}`; c.textAlign = 'center';
+  c.fillText('Parcelamento nos cartões Visa e Mastercard.', W/2, y);
+  c.fillText('Valores sujeitos à aprovação da operadora do cartão.', W/2, y+34);
+  c.textAlign = 'left';
+  // recorta a altura usada
+  const used = Math.min(H, y + 70);
+  const out = document.createElement('canvas'); out.width = W; out.height = used;
+  out.getContext('2d').drawImage(cv, 0, 0);
+  return out;
+}
+let imgBlob = null, imgUrl = null;
+async function abrirOrcamento(){
+  const cv = await gerarImagem();
+  imgBlob = await new Promise(r => cv.toBlob(r, 'image/png'));
+  if(imgUrl) URL.revokeObjectURL(imgUrl);
+  imgUrl = URL.createObjectURL(imgBlob);
+  $('modal-img').src = imgUrl; $('baixar').href = imgUrl;
+  const file = new File([imgBlob], 'orcamento-ingacel.png', {type:'image/png'});
+  const pode = !!(navigator.canShare && navigator.canShare({files:[file]}));
+  $('compartilhar').hidden = !pode;
+  $('modal-tip').textContent = pode ? 'Toque em Compartilhar e escolha o WhatsApp do cliente.' : 'Baixe a imagem e anexe na conversa do cliente no WhatsApp.';
+  $('modal').hidden = false;
 }
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,1800); }
 function copiar(txt){
@@ -319,7 +447,17 @@ function copiar(txt){
 }
 
 $('copiar').addEventListener('click', () => copiar(textoCompleto()));
-$('copiar-um').addEventListener('click', () => copiar(textoUm()));
+$('whats').addEventListener('click', () => { $('whats').href = 'https://wa.me/?text=' + encodeURIComponent(textoCompleto()); });
+$('enviar').addEventListener('click', () => abrirOrcamento().catch(() => toast('Não foi possível gerar a imagem. Use o envio por texto.')));
+$('compartilhar').addEventListener('click', async () => {
+  const file = new File([imgBlob], 'orcamento-ingacel.png', {type:'image/png'});
+  try{ await navigator.share({files:[file], title:'Orçamento Ingácel'}); }
+  catch(e){ if(e && e.name !== 'AbortError') toast('Não deu para compartilhar. Use Baixar imagem.'); }
+});
+const fecharModal = () => $('modal').hidden = true;
+$('modal-x').addEventListener('click', fecharModal);
+$('modal').addEventListener('click', e => { if(e.target.id === 'modal') fecharModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') fecharModal(); });
 $('fechar').addEventListener('click', () => $('copybox').hidden = true);
 document.addEventListener('click', e => {
   const b = e.target.closest('.opt, .debito'); if(!b) return;
