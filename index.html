@@ -95,6 +95,10 @@ svg{flex:none}
   border:1px solid rgba(255,80,90,.7);background:linear-gradient(180deg,#f0222e,#c9000d)}
 .btn.ghost{background:var(--field);border-color:var(--line-2)}
 .btn{text-decoration:none}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.4)}
+.limpar{width:100%;justify-content:center;margin-top:12px}
+body.vazio .opts-panel{opacity:.35;pointer-events:none}
+.aviso{color:#ffb4b9;font-weight:500}
 .btn.wa{background:#1fa855;border-color:#29c766;text-decoration:none}
 .btn.big{font-size:14px;font-weight:600;padding:12px 18px}
 .btn svg{width:15px;height:15px}
@@ -194,7 +198,7 @@ textarea{width:100%;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,monospac
       <div class="rule"></div>
 
       <label class="label" for="valor"><svg><use href="#i-card"/></svg>Valor do aparelho</label>
-      <div class="input"><span>R$</span><input id="valor" inputmode="decimal" autocomplete="off" value="4.599,00"></div>
+      <div class="input"><span>R$</span><input id="valor" inputmode="decimal" autocomplete="off" placeholder="0,00" value=""></div>
 
       <div class="rule"></div>
 
@@ -203,6 +207,7 @@ textarea{width:100%;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,monospac
       <p class="note">Sem entrada? Deixe em branco. Se houver, ela é descontada antes de calcular as parcelas.</p>
 
       <div class="saldo"><small>Saldo a parcelar</small><b id="out-saldo">–</b></div>
+      <button class="btn ghost limpar" id="limpar" type="button">Novo orçamento (limpar valores)</button>
     </section>
 
     <!-- Coluna de resultado -->
@@ -309,6 +314,17 @@ function desenhar(){
   document.querySelector('.debito').setAttribute('aria-pressed', escolha===0);
 
   $('hero-tipo').textContent = s.nome;
+  const vazio = !(s.valor > 0) || !(s.saldo > 0);
+  document.body.classList.toggle('vazio', vazio);
+  $('enviar').disabled = vazio;
+  if(vazio){
+    $('hero-n').innerHTML = '';
+    $('hero-v').textContent = 'R$ 0,00';
+    $('hero-sub').innerHTML = s.valor > 0
+      ? '<span class="aviso">A entrada não pode ser igual ou maior que o valor do aparelho.</span>'
+      : '<span class="aviso">Digite o valor do aparelho para ver as parcelas.</span>';
+    return;
+  }
   const ent = s.entrada>0 ? `<span class="e">+ entrada <b>${brl(s.entrada)}</b></span>` : '';
   if(escolha === 0){
     $('hero-n').innerHTML = 'Débito';
@@ -494,6 +510,7 @@ function modoCelular(){
   return ehCelular() && !!(navigator.canShare && navigator.canShare({files:[teste]}));
 }
 async function abrirOrcamento(){
+  if(!(ultimo && ultimo.valor > 0 && ultimo.saldo > 0)){ toast('Digite o valor do aparelho'); $('valor').focus(); return; }
   const celular = modoCelular();
   const cv = celular ? await gerarImagem() : await gerarPaisagem();
   imgBlob = await new Promise(r => cv.toBlob(r, 'image/png'));
@@ -533,10 +550,18 @@ document.querySelectorAll('button[data-tipo]').forEach(b => b.addEventListener('
   const el = $(id);
   el.addEventListener('input', calcular);
   el.addEventListener('focus', () => setTimeout(() => el.select(), 0));
-  el.addEventListener('blur', () => { const n = num(id); el.value = (id==='entrada' && n===0) ? '' : fmt(n); calcular(); });
+  el.addEventListener('blur', () => { const n = num(id); el.value = n===0 ? '' : fmt(n); calcular(); });
 });
 $('enviar-txt').textContent = modoCelular() ? 'Enviar orçamento' : 'Gerar imagem do orçamento';
+function limpar(){
+  $('valor').value = ''; $('entrada').value = ''; escolha = 12;
+  $('modal').hidden = true; calcular();
+  if(!modoCelular()) $('valor').focus();
+}
+$('limpar').addEventListener('click', limpar);
+window.addEventListener('pageshow', e => { if(e.persisted) limpar(); });
 calcular();
+if(!modoCelular()) $('valor').focus();
 </script>
 </body>
 </html>
