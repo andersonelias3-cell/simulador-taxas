@@ -129,7 +129,7 @@ svg{flex:none}
 
 .modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.72);display:grid;place-items:center;
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-.modal-box{width:min(440px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:12px;background:var(--panel);border:1px solid var(--line-2);border-radius:16px;padding:14px}
+.modal-box{width:min(440px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px;background:var(--panel);border:1px solid var(--line-2);border-radius:16px;padding:14px}
 .modal-box header{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .modal-box header strong{font-size:15px}
 .modal-box .x{background:none;border:0;color:var(--fg-2);font-size:24px;line-height:1;cursor:pointer;padding:0 4px}
@@ -137,10 +137,11 @@ svg{flex:none}
 .modal-box .prev img{display:block;width:100%;height:auto}
 .modal-box .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .modal-box .acts .btn{justify-content:center}
-.modal-box .fone label{display:block;font-size:12px;color:var(--fg-2);margin:0 0 6px}
-.modal-box .fone .input{padding:8px 12px}
-.modal-box .fone .input input{font-size:16px;font-weight:600}
 .modal-box .acts .btn.full{grid-column:1/-1}
+.modal.pc .modal-box{width:auto;max-width:calc(100vw - 32px);grid-template-rows:auto auto auto}
+.modal.pc .prev{overflow:hidden;background:transparent;border:0;display:grid;place-items:center}
+.modal.pc .prev img{width:auto;max-width:100%;max-height:calc(100vh - 130px);max-height:calc(100dvh - 130px);border-radius:10px}
+.modal.pc .acts{grid-template-columns:1fr}
 .modal-box .tip{grid-column:1/-1;color:var(--muted);font-size:11.5px;margin:0;text-align:center}
 .foot{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
 
@@ -211,9 +212,7 @@ textarea{width:100%;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,monospac
         <div class="big"><span class="n" id="hero-n">12x <small>de</small></span><span class="v" id="hero-v">–</span></div>
         <p class="sub" id="hero-sub">–</p>
         <div class="actions">
-          <button class="btn big" id="enviar" type="button"><svg><use href="#i-send"/></svg>Enviar orçamento (imagem)</button>
-          <a class="btn big wa" id="whats" href="https://wa.me/" target="_blank" rel="noopener"><svg><use href="#i-chat"/></svg>Enviar texto no WhatsApp</a>
-          <button class="btn big ghost" id="copiar" type="button"><svg><use href="#i-copy"/></svg>Copiar texto</button>
+          <button class="btn big" id="enviar" type="button"><svg><use href="#i-send"/></svg><span id="enviar-txt">Enviar orçamento</span></button>
         </div>
       </div>
 
@@ -226,13 +225,6 @@ textarea{width:100%;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,monospac
         <div class="grid-opts" id="opts"></div>
       </div>
 
-      <div id="copybox" class="panel side" hidden style="margin-top:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-          <strong>Texto da simulação</strong>
-          <button class="btn ghost" id="fechar" type="button">Fechar</button>
-        </div>
-        <textarea id="copytext" readonly></textarea>
-      </div>
     </section>
   </main>
 
@@ -240,14 +232,9 @@ textarea{width:100%;min-height:200px;font:12.5px/1.5 ui-monospace,Menlo,monospac
 </div>
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-t">
   <div class="modal-box">
-    <header><strong id="modal-t">Orçamento pronto para enviar</strong><button class="x" id="modal-x" type="button" aria-label="Fechar">×</button></header>
+    <header><strong id="modal-t">Orçamento</strong><button class="x" id="modal-x" type="button" aria-label="Fechar">×</button></header>
     <div class="prev"><img id="modal-img" alt="Imagem do orçamento"></div>
-    <div class="fone" id="fone-box">
-      <label for="fone">WhatsApp do cliente <span class="pill">opcional</span></label>
-      <div class="input"><span>+55</span><input id="fone" type="tel" inputmode="tel" autocomplete="off" placeholder="(44) 99999-9999"></div>
-    </div>
     <div class="acts">
-      <button class="btn big wa full" id="web" type="button"><svg><use href="#i-chat"/></svg>Copiar imagem e abrir WhatsApp Web</button>
       <button class="btn big wa full" id="compartilhar" type="button"><svg><use href="#i-chat"/></svg>Enviar pelo WhatsApp</button>
       <a class="btn big ghost full" id="baixar" download="orcamento-ingacel.png" href="#"><svg><use href="#i-down"/></svg>Baixar imagem</a>
       <p class="tip" id="modal-tip"></p>
@@ -335,28 +322,16 @@ function desenhar(){
   }
 }
 
-function escolhaTxt(s){
-  if(escolha===0) return `Débito: ${brl(s.debito)}`;
-  const l = s.linhas[escolha-1]; return `${l.n}x de ${brl(l.parcela)} (total ${brl(l.total)})`;
-}
-function textoCompleto(){
-  const s = ultimo;
-  let t = `*Orçamento Ingácel* 📱\n*${s.nome}*\n\n`;
-  t += `Valor do aparelho: *${brl(s.valor)}*\n`;
-  if(s.entrada>0) t += `Entrada: *${brl(s.entrada)}*\nSaldo a parcelar: *${brl(s.saldo)}*\n`;
-  t += `\n✅ *Opção sugerida:* ${escolhaTxt(s)}\n`;
-  t += `\n💳 *Débito:* ${brl(s.debito)}\n\n*Cartão de crédito:*\n`;
-  s.linhas.forEach(l => t += `${l.n}x de ${brl(l.parcela)} — total ${brl(l.total)}\n`);
-  t += `\n_Valores sujeitos à aprovação da operadora do cartão._`;
-  return t;
-}
 
 /* ===== Imagem do orçamento ===== */
 const logoImg = new Image(); logoImg.src = 'img/logo-texto.png';
 function rr(c,x,y,w,h,r){ c.beginPath(); c.roundRect ? c.roundRect(x,y,w,h,r) : c.rect(x,y,w,h); }
-async function gerarImagem(){
+async function prepararImagem(){
   try{ await Promise.all(['400','500','600','700','800'].map(w => document.fonts.load(`${w} 30px Poppins`))); }catch(e){}
   if(!logoImg.complete) await new Promise(r => { logoImg.onload = logoImg.onerror = r; });
+}
+async function gerarImagem(){
+  await prepararImagem();
   const s = ultimo, W = 1080, P = 64, F = "Poppins, Arial, sans-serif";
   const H = 1920;
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
@@ -435,72 +410,116 @@ async function gerarImagem(){
   out.getContext('2d').drawImage(cv, 0, 0);
   return out;
 }
+/* Versão paisagem para o PC: cabe inteira na tela para tirar print */
+async function gerarPaisagem(){
+  await prepararImagem();
+  const s = ultimo, W = 1600, H = 960, P = 56, F = "Poppins, Arial, sans-serif";
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  c.fillStyle = '#0c0c0f'; c.fillRect(0,0,W,H);
+  let g = c.createRadialGradient(0,0,0,0,0,760); g.addColorStop(0,'rgba(227,0,15,.42)'); g.addColorStop(1,'rgba(227,0,15,0)');
+  c.fillStyle = g; c.fillRect(0,0,W,H);
+  g = c.createRadialGradient(W,H,0,W,H,760); g.addColorStop(0,'rgba(227,0,15,.22)'); g.addColorStop(1,'rgba(227,0,15,0)');
+  c.fillStyle = g; c.fillRect(0,0,W,H);
+  // cabeçalho
+  if(logoImg.naturalWidth){ const lh = 46; c.drawImage(logoImg, P, 46, logoImg.naturalWidth*lh/logoImg.naturalHeight, lh); }
+  c.textAlign = 'right'; c.fillStyle = '#fff'; c.font = `700 36px ${F}`; c.fillText('Orçamento', W-P, 76);
+  c.fillStyle = '#8b8b95'; c.font = `400 22px ${F}`; c.fillText(new Date().toLocaleDateString('pt-BR'), W-P, 104);
+  c.textAlign = 'left';
+  c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 2; c.beginPath(); c.moveTo(P,128); c.lineTo(W-P,128); c.stroke();
+
+  // coluna esquerda: resumo e opção sugerida
+  const LW = 600; let y = 156;
+  c.font = `700 22px ${F}`; const chip = s.nome.toUpperCase(); const cw = c.measureText(chip).width + 36;
+  c.fillStyle = '#e3000f'; rr(c,P,y,cw,44,10); c.fill(); c.fillStyle = '#fff'; c.fillText(chip, P+18, y+30);
+  y += 64;
+  const caixa = (x,yy,w,h,lab,v,tam) => {
+    c.fillStyle = '#16161a'; rr(c,x,yy,w,h,16); c.fill(); c.strokeStyle='rgba(255,255,255,.14)'; c.lineWidth=2; c.stroke();
+    c.fillStyle = '#9a9aa4'; c.font = `500 20px ${F}`; c.fillText(lab, x+22, yy+38);
+    c.fillStyle = '#fff'; c.font = `700 ${tam}px ${F}`; c.fillText(brl(v), x+22, yy+h-24);
+  };
+  caixa(P, y, LW, 104, 'Valor do aparelho', s.valor, 40); y += 120;
+  if(s.entrada>0){
+    const hw = (LW-16)/2;
+    caixa(P, y, hw, 96, 'Entrada', s.entrada, 30);
+    caixa(P+hw+16, y, hw, 96, 'Saldo a parcelar', s.saldo, 30); y += 112;
+  }
+  const hh = 210;
+  g = c.createLinearGradient(P,y,P+LW,y+hh); g.addColorStop(0,'#d4000e'); g.addColorStop(1,'#6e0007');
+  c.fillStyle = g; rr(c,P,y,LW,hh,22); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.85)'; c.font = `600 21px ${F}`; c.fillText('OPÇÃO SUGERIDA', P+30, y+46);
+  let big, tot;
+  if(escolha===0){ big = ['Débito', brl(s.debito)]; tot = brl(s.debito); }
+  else { const l = s.linhas[escolha-1]; big = [`${l.n}x de`, brl(l.parcela)]; tot = brl(l.total); }
+  c.fillStyle = '#fff'; c.font = `700 50px ${F}`; c.fillText(big[0], P+30, y+122);
+  const bw = c.measureText(big[0]+' ').width;
+  let fs = 66; c.font = `800 ${fs}px ${F}`;
+  while(c.measureText(big[1]).width > LW-60-bw && fs > 40){ fs -= 2; c.font = `800 ${fs}px ${F}`; }
+  c.fillText(big[1], P+30+bw, y+124);
+  c.font = `500 26px ${F}`; c.fillStyle = 'rgba(255,255,255,.9)'; c.fillText('Total:', P+30, y+176);
+  const tw = c.measureText('Total: ').width; c.font = `700 32px ${F}`; c.fillStyle = '#fff'; c.fillText(tot, P+30+tw, y+178);
+  y += hh + 16;
+  c.fillStyle = '#1b1b20'; rr(c,P,y,LW,78,16); c.fill(); c.strokeStyle='rgba(255,255,255,.14)'; c.lineWidth=2; c.stroke();
+  c.fillStyle = '#fff'; c.font = `600 28px ${F}`; c.fillText('Débito', P+26, y+49);
+  c.textAlign = 'right'; c.font = `700 32px ${F}`; c.fillText(brl(s.debito), P+LW-26, y+51); c.textAlign = 'left';
+
+  // coluna direita: parcelas
+  const RX = P + LW + 40, RW = W - P - RX;
+  let ry = 176;
+  c.fillStyle = '#fff'; c.font = `600 26px ${F}`; c.fillText('Cartão de crédito', RX, ry);
+  c.fillStyle = '#8b8b95'; c.font = `400 20px ${F}`; c.textAlign='right'; c.fillText('parcela  ·  total', W-P, ry); c.textAlign='left';
+  ry += 22;
+  const colW = (RW-20)/2, rowH = 76;
+  s.linhas.forEach((l,i) => {
+    const col = i<9 ? 0 : 1, row = i%9;
+    const x = RX + col*(colW+20), yy = ry + row*rowH, sel = l.n===escolha;
+    c.fillStyle = sel ? 'rgba(227,0,15,.28)' : '#121216'; rr(c,x,yy,colW,rowH-10,12); c.fill();
+    c.strokeStyle = sel ? '#ff2a36' : 'rgba(255,255,255,.08)'; c.lineWidth = 2; c.stroke();
+    const my = yy + (rowH-10)/2;
+    c.fillStyle = sel ? '#ff2a36' : '#8b8b95'; c.font = `600 24px ${F}`; c.fillText(`${l.n}x`, x+18, my+9);
+    c.fillStyle = '#fff'; c.font = `700 27px ${F}`; c.fillText(brl(l.parcela), x+74, my+10);
+    c.textAlign = 'right'; c.fillStyle = sel ? '#fff' : '#c9c9d1'; c.font = `600 22px ${F}`; c.fillText(brl(l.total), x+colW-16, my+8); c.textAlign = 'left';
+  });
+  c.fillStyle = '#8b8b95'; c.font = `400 20px ${F}`; c.textAlign = 'center';
+  c.fillText('Parcelamento nos cartões Visa e Mastercard  ·  Valores sujeitos à aprovação da operadora do cartão.', W/2, H-34);
+  c.textAlign = 'left';
+  return cv;
+}
 let imgBlob = null, imgUrl = null;
 function ehCelular(){
   return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
 }
-function foneWa(){
-  let d = $('fone').value.replace(/\D/g,'');
-  if(!d) return '';
-  if(d.length <= 11) d = '55' + d;
-  return d;
+function modoCelular(){
+  const teste = new File([new Blob(['x'],{type:'image/png'})], 'x.png', {type:'image/png'});
+  return ehCelular() && !!(navigator.canShare && navigator.canShare({files:[teste]}));
 }
 async function abrirOrcamento(){
-  const cv = await gerarImagem();
+  const celular = modoCelular();
+  const cv = celular ? await gerarImagem() : await gerarPaisagem();
   imgBlob = await new Promise(r => cv.toBlob(r, 'image/png'));
   if(imgUrl) URL.revokeObjectURL(imgUrl);
   imgUrl = URL.createObjectURL(imgBlob);
   $('modal-img').src = imgUrl; $('baixar').href = imgUrl;
-  const file = new File([imgBlob], 'orcamento-ingacel.png', {type:'image/png'});
-  const podeShare = !!(navigator.canShare && navigator.canShare({files:[file]}));
-  const celular = ehCelular() && podeShare;
+  $('modal').classList.toggle('pc', !celular);
   $('compartilhar').hidden = !celular;
-  $('web').hidden = celular;
-  $('fone-box').hidden = celular;
+  $('baixar').hidden = !celular;
   $('modal-tip').textContent = celular
     ? 'Toque em Enviar pelo WhatsApp e escolha a conversa do cliente.'
-    : 'A imagem é copiada e o WhatsApp Web abre numa nova aba. Na conversa do cliente, aperte Ctrl + V e envie.';
+    : 'Tire o print desta imagem e envie ao cliente.';
   $('modal').hidden = false;
 }
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,1800); }
-function copiar(txt){
-  const mostrar = () => { $('copytext').value = txt; $('copybox').hidden = false; $('copytext').select(); };
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(txt).then(() => toast('Copiado! Cole no WhatsApp'), () => { mostrar(); toast('Selecione e copie o texto abaixo'); });
-  } else mostrar();
-}
 
-$('copiar').addEventListener('click', () => copiar(textoCompleto()));
-$('whats').addEventListener('click', () => { $('whats').href = 'https://wa.me/?text=' + encodeURIComponent(textoCompleto()); });
-$('enviar').addEventListener('click', () => abrirOrcamento().catch(() => toast('Não foi possível gerar a imagem. Use o envio por texto.')));
+$('enviar').addEventListener('click', () => abrirOrcamento().catch(() => toast('Não foi possível gerar a imagem. Tente de novo.')));
 $('compartilhar').addEventListener('click', async () => {
   const file = new File([imgBlob], 'orcamento-ingacel.png', {type:'image/png'});
   try{ await navigator.share({files:[file], title:'Orçamento Ingácel'}); }
   catch(e){ if(e && e.name !== 'AbortError') toast('Não deu para compartilhar. Use Baixar imagem.'); }
 });
-$('web').addEventListener('click', async () => {
-  const fone = foneWa();
-  const url = 'https://web.whatsapp.com/' + (fone ? 'send?phone=' + fone : '');
-  let copiou = false;
-  try{
-    if(navigator.clipboard && window.ClipboardItem){
-      await navigator.clipboard.write([new ClipboardItem({'image/png': imgBlob})]);
-      copiou = true;
-    }
-  }catch(e){}
-  if(!copiou) $('baixar').click();
-  const w = window.open(url, 'whatsapp-web');
-  if(!w) location.href = url;
-  toast(copiou ? 'Imagem copiada! Na conversa, aperte Ctrl + V' : 'Imagem baixada. Arraste para a conversa do cliente');
-  $('modal-tip').textContent = copiou
-    ? 'Imagem copiada. No WhatsApp Web, abra a conversa do cliente, aperte Ctrl + V e envie.'
-    : 'Seu navegador não deixou copiar a imagem. Ela foi baixada: arraste o arquivo para a conversa do cliente.';
-});
 const fecharModal = () => $('modal').hidden = true;
 $('modal-x').addEventListener('click', fecharModal);
 $('modal').addEventListener('click', e => { if(e.target.id === 'modal') fecharModal(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape') fecharModal(); });
-$('fechar').addEventListener('click', () => $('copybox').hidden = true);
 document.addEventListener('click', e => {
   const b = e.target.closest('.opt, .debito'); if(!b) return;
   escolha = +b.dataset.n; desenhar();
@@ -516,6 +535,7 @@ document.querySelectorAll('button[data-tipo]').forEach(b => b.addEventListener('
   el.addEventListener('focus', () => setTimeout(() => el.select(), 0));
   el.addEventListener('blur', () => { const n = num(id); el.value = (id==='entrada' && n===0) ? '' : fmt(n); calcular(); });
 });
+$('enviar-txt').textContent = modoCelular() ? 'Enviar orçamento' : 'Gerar imagem do orçamento';
 calcular();
 </script>
 </body>
